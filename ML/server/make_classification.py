@@ -46,16 +46,18 @@ def process(json_data):
 
     df = pd.DataFrame(json_data).dropna()
     df['comment_fixed'] = df['comment'].apply(prepare_rewiew)
-    df['comment_fixed']
-    main_data = main_vectorizer.transform(df.comment_fixed)
-
-    df['tone_predicted'] = model_main.predict(main_data)
+    df_fixed = df.dropna()
+    if len(df_fixed.comment_fixed) > 0:
+        main_data = main_vectorizer.transform(df_fixed.comment_fixed)
+        df_fixed['tone_predicted'] = model_main.predict(main_data)
+    else: df_fixed['tone_predicted'] = None
+    df = df.merge(df_fixed[['id', 'tone_predicted']],on='id', how='left')
 
     problem_df = df[df['tone_predicted']==3]
+    if len(problem_df.comment_fixed) > 0:
+        problem_data = problem_vectorizer.transform(problem_df.comment_fixed)
+        problem_df['problem_predicted'] = model_problem.predict(problem_data)
+    else: problem_df['problem_predicted'] = None
 
-    problem_data = problem_vectorizer.transform(problem_df.comment_fixed)
-
-    problem_df['problem_predicted'] = model_problem.predict(problem_data)
-
-    final_data = df.join(problem_df[['id', 'problem_predicted']],lsuffix='_caller', rsuffix='_other')
-    return final_data[['id_caller', 'tone_predicted', 'problem_predicted']].rename(columns = {'id_caller':'id'}).to_json(orient="records")
+    final_data = df.merge(problem_df[['id', 'problem_predicted']],on='id', how='left')
+    return final_data[['id', 'tone_predicted', 'problem_predicted']].to_json(orient="records")
