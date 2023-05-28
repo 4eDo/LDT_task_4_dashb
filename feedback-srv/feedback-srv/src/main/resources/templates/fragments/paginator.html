@@ -1,0 +1,14 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml">
+    <div th:fragment="paginator" class="paginator">
+        <h4 th:with="paginator=${data.get('paginator')}">
+            Всего страниц: <span th:text="${paginator.pageCount}"></span>;
+            Текущая страница: <span th:text="${paginator.currentPage}"></span>;
+            Размер страницы: <span th:text="${paginator.pageSize}"></span>;
+            <form method="post" th:action="@{${'/' + layout}}">
+                Перейти на страницу
+                <input name="page" type="number" min="1" th:value="${paginator.currentPage}" th:max="${paginator.pageCount}">
+                и показать на странице <input name="pageSize" type="number" min="1" max="100" th:value="${paginator.pageSize}"> записей
+                <button class="button" style="display: inline-block !important;" type="submit">Ок</button>
+            </form></h4>
+    </div>
+</th:block>

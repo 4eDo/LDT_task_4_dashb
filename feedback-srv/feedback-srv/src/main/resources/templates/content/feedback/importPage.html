@@ -1,0 +1,24 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content">
+    <style>
+    section {
+        border-radius: 1em;
+        padding: 1em;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%) }
+  </style>
+    <section>
+        <p class="block attention">ИМПОРТ СООБЩЕНИЙ ПРИ ПОМОЩИ CSV ФАЙЛА</p>
+        <form action="/feedback/file" method="post" enctype="multipart/form-data">
+            <p class="italic">В файле должен быть заголовок вида</p>
+            <pre>comment;createdate;stars;summ</pre>
+            <p class="italic">где comment - текст отзыва,
+                createdate - дата создания, stars - оценка от 1 до 5, summ - сумма заказа.
+            <br/>Разделителем должна служить точка с запятой.</p>
+            <input type="file" id="file" name="file" accept=".csv">
+            <button type="submit">ИМПОРТИРОВАТЬ csv</button>
+        </form>
+    </section>
+</th:block>

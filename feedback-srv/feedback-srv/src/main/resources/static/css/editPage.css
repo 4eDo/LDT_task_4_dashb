@@ -1,0 +1,55 @@
+/*оформление таблиц*/
+table {
+	width: 100%;
+	margin: 10px 10px 0px 0px;
+
+}
+.edit_content {
+ 	position: absolute;
+ 	top: 70px;
+ 	width: 100%;
+ 	display: flex;
+     flex-direction: column;
+ }
+
+th {
+	border: 1px solid #BFCADA;
+}
+
+td {
+		border: 1px solid #BFCADA;
+}
+
+.name_td {
+	width: 90px;
+}
+
+.stars_td {
+	display: flex;
+	text-align: center;
+	height: 30px;
+}
+
+.stars_mark_td {
+    width: 20%;
+    text-align: center;
+    display: flex;
+
+}
+
+.stars_value_td {
+    width: 20%;
+    text-align: center;
+}
+
+.stars_value_div {
+	width: 100%;
+    display: flex;
+}
+
+/*оформление кнопок и полей для заполнения*/
+input, textarea {
+	border-radius: 5px 5px 5px 5px;
+	border: 1px solid #2f3342;
+	width: 100%;
+}

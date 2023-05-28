@@ -1,0 +1,24 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml">
+    <nav th:fragment="navbar" class="head_menu">
+            <a class="adm_bt button"
+               th:classappend="${#strings.equals(layout, 'navigation')} ? h_bt_active : ''"
+               href="/">Навигация </a>
+            <a class="adm_bt button"
+               th:classappend="${#strings.equals(layout, 'postamat')} ? h_bt_active : ''"
+               href="/postamat/">Постаматы </a>
+            <a class="adm_bt button"
+               th:classappend="${#strings.equals(layout, 'partner')} ? h_bt_active : ''"
+               href="/partner/">Партнёры</a>
+            <a class="adm_bt button"
+               th:classappend="${#strings.equals(layout, 'ticket')} ? h_bt_active : ''"
+               href="/ticket/">Тикеты</a>
+            <a class="adm_bt button"
+               th:classappend="${#strings.equals(layout, 'feedback')} ? h_bt_active : ''"
+               href="/feedback/">Отзывы</a>
+            <a class="adm_bt button"
+               th:classappend="${#strings.equals(layout, 'statistic')} ? h_bt_active : ''"
+               href="/statistic/">Статистика</a>
+            <a class="adm_bt button"
+               href="/swagger-ui/" target="_blank">Посмотреть API</a>
+    </nav>
+</th:block>

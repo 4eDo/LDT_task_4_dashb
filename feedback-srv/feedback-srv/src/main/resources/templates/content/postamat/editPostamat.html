@@ -1,0 +1,92 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content" th:with="action=${data.get('action')}">
+    <h2 th:text="${action}">Add or edit</h2>
+    <form method="post"
+          name="editForm"
+          id="editForm"
+          th:action="@{${'/postamat/' + action}}">
+    <table id="postamattable" class="" th:with="postamat=${data.get('postamat')}">
+
+        <tr class="" th:if="${action == 'edit'}">
+            <td class="name_td">Идентификатор</td>
+            <td valign="center" class="">
+                <p><input type="text" name="id" readonly th:value="${postamat.id}"></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Адрес установки</td>
+            <td valign="center" class="">
+                <p><input type="text" name="address" th:value="${postamat.address}" required></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Почтовый индекс</td>
+            <td valign="center" class="">
+                <p><input type="text" name="postIndex" th:value="${postamat.postIndex}" required></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">ip-адрес</td>
+            <td valign="center" class="">
+            <p><input type="text" name="ipAddress" th:value="${postamat.ipAddress}"></p>
+        </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Широта</td>
+            <td valign="center" class="">
+                <p><input type="number" name="latitude" step="0.000001" th:value="${postamat.latitude}" required></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Долгота</td>
+            <td valign="center" class="">
+                <p><input type="number" name="longitude" step="0.000001" th:value="${postamat.longitude}" required></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Дата установки</td>
+            <td valign="center" class="">
+                    <input type="datetime-local" name="setupDate" th:value="${postamat.setupDate}">
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Версия ПО</td>
+            <td valign="center" class="">
+                <p><input type="text" name="softwareVersion" th:value="${postamat.softwareVersion}" required></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Комментарий</td>
+            <td valign="center" class="">
+                <p><textarea
+                        name="comment"
+                        id="comment"
+                        form="editForm"
+                        th:text="${postamat.comment}"></textarea></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Тип</td>
+            <td valign="center" class="">
+                <p><input name="type" type="text" th:value="${postamat.type}" required></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Локация</td>
+            <td valign="center" class="">
+                <p><input name="location" type="text" th:value="${postamat.location}" required></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Действие</td>
+            <td valign="center" class="">
+                <p th:if="${action == 'add'}">
+                    <button class="button">Добавить</button>
+                </p>
+                <p th:if="${action == 'edit'}">
+                    <button class="button" href="#">Сохранить изменения</button>
+                </p>
+            </td>
+        </tr>
+    </table>
+    </form>
+</th:block>
