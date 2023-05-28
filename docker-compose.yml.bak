@@ -4,7 +4,7 @@ services:
   postgres:
     image: "postgres:15"
     ports:
-      - "5432:5432"
+      - "54322:54322"
     environment:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
@@ -18,7 +18,5 @@ services:
     image: feedback-srv-0.0.1:latest
     ports:
       - "11111:11111"
-    expose:
-      - "11111"
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: 127.0.0.1
