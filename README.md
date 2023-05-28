@@ -14,5 +14,8 @@
 
 
 ## Презетация доступна по ссылке
-[Презентация к прототипу](docs/4 задача_дашбордизация.pdf)
+[Презентация к прототипу](https://github.com/4eDo/LDT_task_4_dashb/blob/main/docs/4%20%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0_%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F.pdf)
+
+[Figma](https://www.figma.com/proto/S25HRHxvDzP42He4jZ6a0J/%D0%9C%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D1%82%D0%BE%D0%BC%D0%B0%D1%82.-%D0%9E%D0%B1%D1%80%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D1%81%D0%B2%D1%8F%D0%B7%D1%8C.?type=design&node-id=63-21329&scaling=scale-down&page-id=0%3A1&starting-point-node-id=123%3A21076)
+
 
