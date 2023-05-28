@@ -8,10 +8,10 @@
     <th:block th:fragment="content">
         <th:block th:if="${#strings.equals(data.get('content'), 'postamatslist')}">
             <th:block th:replace="fragments/paginator :: paginator"></th:block>
-            <th:block th:replace="/content/postamat/main :: content"></th:block>
+            <th:block th:replace="content/postamat/main :: content"></th:block>
         </th:block>
         <th:block th:if="${#strings.equals(data.get('content'), 'edit')}">
-            <div class="edit_content"><th:block th:replace="/content/postamat/editPostamat :: content"></th:block></div>
+            <div class="edit_content"><th:block th:replace="content/postamat/editPostamat :: content"></th:block></div>
         </th:block>
     </th:block>
 </th:block>

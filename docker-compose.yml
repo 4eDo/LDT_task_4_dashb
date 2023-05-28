@@ -21,4 +21,5 @@ services:
     expose:
       - "11111"
     environment:
-      DB_HOST: "0.0.0.0"
+      DB_HOST: "host.docker.internal"
+      PY_HOST: "host.docker.internal"

@@ -41,6 +41,7 @@ public class RandomGenerators {
     }
 
     public static int getRandIntInRange(int min, int max){
-        return min + r.nextInt(max - min);
+        int d = Math.max(max - min, 1);
+        return min + r.nextInt(d);
     }
 }
