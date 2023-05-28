@@ -21,4 +21,4 @@ services:
     expose:
       - "11111"
     environment:
-      DB_HOST: localhost
+      DB_HOST: "host.docker.internal"
