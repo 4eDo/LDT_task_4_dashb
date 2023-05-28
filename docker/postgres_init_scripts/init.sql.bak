@@ -1,0 +1,39 @@
+
+CREATE DATABASE lartechdb;
+GRANT ALL PRIVILEGES ON DATABASE "lartechdb" to lartech;
+
+CREATE DATABASE tafeldb;
+GRANT ALL PRIVILEGES ON DATABASE "tafeldb" to lartech;
+
+CREATE DATABASE wafeldb;
+GRANT ALL PRIVILEGES ON DATABASE "wafeldb" to lartech;
+
+CREATE DATABASE authsrvdb;
+GRANT ALL PRIVILEGES ON DATABASE "authsrvdb" to lartech;
+
+CREATE DATABASE devregsrvdb;
+GRANT ALL PRIVILEGES ON DATABASE "devregsrvdb" to lartech;
+
+CREATE DATABASE nwksrvdb;
+GRANT ALL PRIVILEGES ON DATABASE "nwksrvdb" to lartech;
+
+CREATE DATABASE billingsrvdb;
+GRANT ALL PRIVILEGES ON DATABASE "billingsrvdb" to lartech;
+
+CREATE DATABASE firmwaresrvdb;
+GRANT ALL PRIVILEGES ON DATABASE "firmwaresrvdb" to lartech;
+
+CREATE DATABASE timesyncdb;
+GRANT ALL PRIVILEGES ON DATABASE "timesyncdb" to lartech;
+
+CREATE DATABASE monitoringdb;
+GRANT ALL PRIVILEGES ON DATABASE "monitoringdb" to lartech;
+
+CREATE DATABASE expodb;
+GRANT ALL PRIVILEGES ON DATABASE "expodb" to lartech;
+
+CREATE DATABASE meteringdb;
+GRANT ALL PRIVILEGES ON DATABASE "meteringdb" to lartech;
+
+CREATE DATABASE mvpuidb;
+GRANT ALL PRIVILEGES ON DATABASE "mvpuidb" to lartech;
