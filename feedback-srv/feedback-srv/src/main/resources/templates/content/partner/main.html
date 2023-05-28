@@ -1,0 +1,42 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content">
+
+    <p><a class="button" href="/partner/add">Добавить</a></p>
+    <table id="partnertable" class="" th:with="partners=${data.get('partners')}">
+        <thead>
+        <tr class="">
+            <td>Идентификатор</td>
+            <td>Имя организации</td>
+            <td>Контакты</td>
+            <td>Представитель</td>
+            <td>Комментарий</td>
+        </tr>
+        </thead>
+        <th:block th:each="partner : ${partners}" th:fragment="next">
+            <tr>
+                <td valign="center" class="">
+                    <p><span th:text="${partner.id}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${partner.name}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${partner.contacts}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${partner.delegate}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${partner.description}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p>
+                        <a class="button" th:href="${'/partner/edit/' + partner.id}">изменить</a>
+
+                        </br>
+                        <a href="#" class="delete button" th:data-id="${partner.id}">удалить</a>
+                    </p>
+                </td>
+            </tr>
+        </th:block>
+    </table>
+</th:block>

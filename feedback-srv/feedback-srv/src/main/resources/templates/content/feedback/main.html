@@ -1,0 +1,73 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content">
+
+    <p><a class="button block" href="/feedback/add">Добавить один отзыв</a></p>
+    <p><a class="button block" href="/feedback/import">Импортировать csv</a></p>
+
+    <table id="messagetable" class="" th:with="messages=${data.get('messages')}">
+        <thead>
+        <tr class="">
+            <td>#</td>
+            <td>Автор</td>
+            <td>Дата создания</td>
+            <td>Постамат</td>
+            <td>Партнёр</td>
+            <td>Код заказа</td>
+            <td>Сообщение</td>
+            <td>Оценка</td>
+            <td>Тип обращения</td>
+            <td>Характер сообщения</td>
+        </tr>
+        </thead>
+        <th:block th:each="message : ${messages}" th:fragment="next">
+            <tr>
+                <td valign="center" class="">
+                    <p><span th:text="${message.id}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${message.username != null}"><span th:text="${message.username}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${message.createDate != null}">
+                        <span th:text="${#calendars.format(message.createDate,'yyyy-MM-dd HH:mm')}"></span>
+                    </p>
+                    <p th:if="${message.createDate == null}">нет данных</p>
+                </td>
+                <td valign="center" class="">
+                    <th:block th:if="${message.postamat != null}">
+                        <p class="muted italic"><span th:text="${message.postamat.id}">ПОСТАМАТ</span><br/>
+                        Индекс: <span th:text="${message.postamat.postIndex}">ПОСТАМАТ</span>,
+                         <span th:text="${message.postamat.address}">ПОСТАМАТ</span><br/>
+                       Место установки: <span th:text="${message.postamat.location}">ПОСТАМАТ</span><br/>
+                       Тип: <span th:text="${message.postamat.type}">ПОСТАМАТ</span></p>
+                        <p class="muted italic" th:if="${message.postamat.isDeleted}" th:text="${message.postamat.comment}"></p>
+                    </th:block>
+                </td>
+                <td valign="center" class="">
+                    <th:block th:if="${message.partner != null}">
+                        <p><span th:text="${message.partner.name}">ПАРТНЁР</span></p>
+                        <p class="muted italic" th:if="${message.partner.isDeleted}" th:text="${message.partner.description}"></p>
+                    </th:block>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${message.orderId != null}"><span th:text="${message.orderId}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${message.message}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${message.stars != null}"><span th:text="${message.stars}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${message.category != null}"><span th:text="${message.category.description}"></span></p>
+                    <p th:if="${message.category == null}"><span>Не определено</span></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${(message.tone > -1) && message.tone < 1.5}">Положительно</p>
+                    <p th:if="${(message.tone > -1) && !(message.tone < 1.5) && !(message.tone > 2.5)}">Нейтрально</p>
+                    <p th:if="${(message.tone > -1) && message.tone > 2.5}">Отрицательно</p>
+                    <p th:if="${!(message.tone > -1)}">Не определено</p>
+                </td>
+            </tr>
+        </th:block>
+    </table>
+</th:block>

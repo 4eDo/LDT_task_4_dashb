@@ -1,0 +1,34 @@
+/*оформление блоков Приветствия, сообщения,
+кастомизация поля для ввода текста*/
+#hi_info {
+	display: block;
+}
+
+#mail_box {
+	padding: 10px;
+}
+
+#adm_message {
+	width: 100%;
+	min-height: 50px;
+	background-color: #E2E7EE;
+	margin: 0px 0px 10px 0px;
+}
+
+/*функциональные кнопки "Выход", "Выбрать файл" и "Карта"*/
+#exit_bt {
+	position: fixed; 
+	right: 0px; 
+	margin-right: 10px;
+}
+
+#upload_bt {
+	border: 0px solid #BFCADA !important;
+	font-family: "TT Firs Neue Trl Regular";
+}
+
+#map_bt {
+	position: absolute;
+	right: 0px;
+	margin: 0px 10px 0px 0px;
+}

@@ -1,0 +1,60 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content" th:with="action=${data.get('action')}">
+    <h2 th:text="${action}">Add or edit</h2>
+    <form method="post"
+          name="editForm"
+          id="editForm"
+          th:action="@{${'/partner/' + action}}">
+    <table id="partnertable" class="" th:with="partner=${data.get('partner')}">
+
+        <tr class="" th:if="${action == 'edit'}">
+            <td class="name_td">Идентификатор</td>
+            <td valign="center" class="">
+                <p><input type="text" name="id" readonly th:value="${partner.id}"></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Имя организации</td>
+            <td valign="center" class="">
+                <p><input type="text" name="name" th:value="${partner.name}" required></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Контакты</td>
+            <td valign="center" class="">
+                <p><textarea
+                        name="contacts"
+                        id="contacts"
+                        form="editForm"
+                        th:text="${partner.contacts}"></textarea></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Представитель</td>
+            <td valign="center" class="">
+            <p><input type="text" name="delegate" th:value="${partner.delegate}"></p>
+        </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Комментарий</td>
+            <td valign="center" class="">
+                <p><textarea
+                        name="description"
+                        id="description"
+                        form="editForm"
+                        th:text="${partner.description}"></textarea></p>
+            </td>
+        </tr>
+        <tr class="">
+            <td class="name_td">Действие</td>
+            <td valign="center" class="">
+                <p th:if="${action == 'add'}">
+                    <button class="button">Добавить</button>
+                </p>
+                <p th:if="${action == 'edit'}">
+                    <button class="button" >Сохранить изменения</button>
+                </p>
+            </td>
+        </tr>
+    </table>
+    </form>
+</th:block>

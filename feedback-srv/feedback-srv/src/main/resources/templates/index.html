@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:with="now=${#dates.format(#dates.createNow(),'YYYYMMddHHmmSS')}">
+    <meta charset="UTF-8">
+    <title>Московский постамат</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1" name=viewport>
+    <meta property="description" content="Московский постамат">
+
+    <link rel="shortcut icon" type="image/x-icon" th:href="'/img/favicon.ico?' + ${now}">
+    <link rel="icon" type="image/png" th:href="'/img/favicon.ico?' + ${now}"/>
+
+
+    <link rel="stylesheet" type="text/css" th:href="'/fonts/iconfont/material-icons.css'">
+    <link rel="stylesheet" type="text/css" th:href="'/fonts/TTFirsNeue-Regular/style.css'">
+
+    <link rel="stylesheet" type="text/css" th:href="'/css/base_style.css'">
+    <link rel="stylesheet" type="text/css" th:href="'/css/style_1.css'">
+
+    <script type="text/javascript" th:src="'/js/core/jquery.min.js?' + ${now}"></script>
+
+    <th:block th:replace="${'layouts/' + layout} :: head"></th:block>
+</head>
+<body class="TTFirsNeue">
+<header th:replace="fragments/header :: header"></header>
+<th:block th:replace="fragments/navbar :: navbar"></th:block>
+<main class="d-flex main-content js-main-content TTFirsNeue">
+    <th:block th:if="${#strings.equals(data.get('content'), 'error')}">
+        <div th:replace="${'fragments/content/errors/' + data.get('errorType')} :: error"></div>
+    </th:block>
+
+    <th:block th:replace="${'layouts/' + layout} :: content"></th:block>
+</main>
+</body>
+</html>

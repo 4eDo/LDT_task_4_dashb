@@ -1,0 +1,51 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content">
+
+    <table id="tickettable" class="" th:with="tickets=${data.get('tickets')}">
+        <thead>
+        <tr class="">
+            <td>#</td>
+            <td>Дата создания</td>
+            <td>Категория</td>
+            <td>Партнёр</td>
+            <td>Сообщение</td>
+            <td>Комментарий</td>
+            <td>Действие</td>
+        </tr>
+        </thead>
+        <th:block th:each="ticket : ${tickets}" th:fragment="next">
+            <tr>
+                <td valign="center" class="">
+                    <p><span th:text="${ticket.id}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${ticket.createDate != null}">
+                        <span th:text="${#calendars.format(ticket.createDate,'yyyy-MM-dd HH:mm')}"></span>
+                    </p>
+                    <p th:if="${ticket.createDate == null}">нет данных</p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${ticket.category.description}">Категория проблемы</span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${ticket.partner.name}">ПАРТНЁР</span></p>
+                    <p class="muted italic" th:if="${ticket.partner.isDeleted}" th:text="${message.partner.description}"></p>
+                </td>
+                <td valign="center" class="">
+                    <p><a th:href="${'/feedback/info/' + msg}" th:each="msg : ${ticket.messages}" th:text="${msg}"></a></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${ticket.comment}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${ticket.isClosed == null || !ticket.isClosed}">
+                        <a class="button" th:href="${'/ticket/close/' + ticket.id}">Закрыть</a></br></br>
+                        <a class="button" th:href="${'/ticket/comment/' + ticket.id}">Изменить комментарий</a>
+                    </p>
+                    <p th:if="${ticket.isClosed != null && ticket.isClosed}">
+                        Тикет закрыт
+                    </p>
+                </td>
+            </tr>
+        </th:block>
+    </table>
+</th:block>

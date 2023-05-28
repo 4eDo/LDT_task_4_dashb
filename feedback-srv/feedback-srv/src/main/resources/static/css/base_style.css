@@ -1,0 +1,190 @@
+
+body {
+	margin: 0px;
+	background-color: #BFCADA;
+}
+
+main {
+    margin-top: 55px;
+}
+
+header {
+    width: 100%;
+    height: 55px;
+    position: fixed;
+    top: 0px;
+    background-color: #2f3342;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+}
+
+
+/*Иконка "Московский Постомат"*/
+.mp_icon {
+	width: 194px;
+	height: 70px;
+	display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    position: fixed;
+}
+
+/*Кнопки-вкладки*/
+.head_menu, nav.head_menu {
+    width: 100%;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    border-radius: 0px 0px 5px 5px;
+    flex-wrap: nowrap;
+    justify-content: center;
+	z-index: 1;
+}
+
+.adm_bt {
+	width: 100%;
+	height: 30px;
+	border-radius: 0px 0px 5px 5px;
+    background-color: #E2E7EE;
+	border: 1px solid #E2E7EE;
+}
+
+.h_bt_active {
+    background-color: #2f3342;
+  color: #fff !important;
+  border: 1px solid #2f3342;
+}
+
+.head_menu .button:hover, nav.head_menu .button:hover {
+    background-color: #BFCADA;
+	border: 1px solid #BFCADA;
+	color: #000;
+}
+
+.paginator{
+    padding-top: 20px;
+}
+
+/*Блок под содержимое для заполнения,
+оформление блоков обычное и "внимание", скрытие блока */
+#content {
+	position: absolute;
+	top: 30px;
+	width: 100%;
+}
+
+.block {
+	margin: 10px;
+	padding: 10px;
+	border-radius: 5px;
+	background-color: #E2E7EE;
+	}
+	
+.attention {
+	background-color: #FF1935 !important;
+	color: #fff;
+}
+
+.hide {
+	display: none;
+}
+	
+/*оформление таблиц*/
+table {
+	width: 100%;
+	border-radius: 5px 5px 5px 5px;
+	border: 1px solid #BFCADA;
+	margin: 10px 10px 0px 0px;
+	background-color: #E2E7EE;
+}
+
+th {
+	border: 1px solid #BFCADA;
+}
+
+td {
+	text-align: center;
+		border: 1px solid #BFCADA;
+}
+
+
+/*оформление кнопок и полей для заполнения*/
+input {
+	font-family: "TT Firs Neue Trl Regular";
+	border-radius: 5px 5px 5px 5px;
+	border: 1px solid #2f3342;
+	margin: 0px 0px 10px 0px;
+	
+}
+
+.button {
+    text-align: center;
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #000;
+}
+
+a:link, a:visited, a:hover  {
+    text-decoration: none;
+    color: #000;
+}
+
+
+/*оформление текста*/
+.bold {
+	font-weight: bold;
+}
+
+.italic {
+	font-style: italic;
+}
+
+.muted {
+    color: #7f95a8!important;
+}
+
+
+button {
+	min-width: 75px;
+	height: 40px;
+	border-radius: 5px 5px 5px 5px;
+	border: 1px solid #2f3342;
+	background-color: #FF1935;
+	color: #fff;
+	margin: 10px;
+}
+
+button:hover {
+	background-color: #fff;
+	color: #2f3342;
+}
+
+/*Иконка "Московский Постомат"*/
+.mp_icon {
+  width: 194px;
+  position: fixed;
+  left: 0px;
+}
+
+.head_name {
+  text-align: center;
+  color: #fff;
+  width:500px;
+  left: 500px;
+}
+
+.lct_logo {
+  width: 194px;
+  position: fixed;
+  right: 0px;
+  filter: contrast(0) brightness(2);
+  margin-right: 10px;
+}

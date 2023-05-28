@@ -1,0 +1,68 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content">
+
+    <p><a class="button" href="/postamat/add">Добавить один</a></p>
+    <p><a class="button" id="generateRand" href="#">Сгенерировать случайно</a></p>
+
+    <table id="postamattable" class="" th:with="postamats=${data.get('postamats')}">
+        <thead>
+        <tr class="">
+            <td>Идентификатор</td>
+            <td>Адрес установки</td>
+            <td>Почтовый индекс</td>
+            <td>ip-адрес</td>
+            <td>Координаты</td>
+            <td>Дата установки</td>
+            <td>Версия ПО</td>
+            <td>Комментарий</td>
+            <td>Тип</td>
+            <td>Локация</td>
+            <td>Действие</td>
+        </tr>
+        </thead>
+        <th:block th:each="postamat : ${postamats}" th:fragment="next">
+            <tr>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.id}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.address}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.postIndex}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.ipAddress}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.latitude}"></span>, <span th:text="${postamat.longitude}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${postamat.setupDate != null}">
+                        <span th:text="${#calendars.format(postamat.setupDate,'yyyy-MM-dd HH:mm')}"></span>
+                    </p>
+                    <p th:if="${postamat.setupDate == null}">нет данных</p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.softwareVersion}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.comment}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.type}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p><span th:text="${postamat.location}"></span></p>
+                </td>
+                <td valign="center" class="">
+                    <p>
+                        <a class="button" th:href="${'/postamat/edit/' + postamat.id}">изменить</a>
+
+                        </br>
+                        <a href="#" class="delete button" th:data-id="${postamat.id}">удалить</a>
+                    </p>
+                </td>
+            </tr>
+        </th:block>
+    </table>
+</th:block>
