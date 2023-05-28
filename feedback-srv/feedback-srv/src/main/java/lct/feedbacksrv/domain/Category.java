@@ -29,9 +29,10 @@ public class Category implements Serializable {
     private String code;
     @Column(name="description")
     private String description;
-    @ManyToOne
-    @JoinColumn(name = "archetype", referencedColumnName = "id")
-    private Archetype archetype;
+//    @ManyToOne
+//    @JoinColumn(name = "archetype", referencedColumnName = "id")
+@Column(name="archetype")
+    private String archetype;
     @Column(name="parent")
     private Integer parent;
 }

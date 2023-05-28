@@ -24,6 +24,9 @@
                     <p th:if="${ticket.createDate == null}">нет данных</p>
                 </td>
                 <td valign="center" class="">
+                    <p><span th:text="${ticket.category.description}">Категория проблемы</span></p>
+                </td>
+                <td valign="center" class="">
                     <p><span th:text="${ticket.partner.name}">ПАРТНЁР</span></p>
                     <p class="muted italic" th:if="${ticket.partner.isDeleted}" th:text="${message.partner.description}"></p>
                 </td>
@@ -34,8 +37,12 @@
                     <p><span th:text="${ticket.comment}"></span></p>
                 </td>
                 <td valign="center" class="">
-                    <p>
-                        <a class="button" th:href="${'/ticket/close/' + ticket.id}">Закрыть</a>
+                    <p th:if="${ticket.isClosed == null || !ticket.isClosed}">
+                        <a class="button" th:href="${'/ticket/close/' + ticket.id}">Закрыть</a></br></br>
+                        <a class="button" th:href="${'/ticket/comment/' + ticket.id}">Изменить комментарий</a>
+                    </p>
+                    <p th:if="${ticket.isClosed != null && ticket.isClosed}">
+                        Тикет закрыт
                     </p>
                 </td>
             </tr>

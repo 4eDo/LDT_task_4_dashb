@@ -94,6 +94,46 @@ public class FeedbackController extends MainController{
         return render(data);
     }
 
+    @GetMapping(path = {"/info/{id}"})
+    @ApiIgnore
+    public ModelAndView getOneMessageUI(@PathVariable("id") Long id) {
+        log.info("Get message {}", id);
+
+        Map<String, Object> data = getHeaderMap();
+        data.put("content", "messageslist");
+
+        try {
+            Long partnersCount = feedbackService.getCount();
+            int page = 0;
+            int pageSize = 30;
+            Optional<Message> m = feedbackService.getMessage(id);
+            List<Message> singleMessage = new ArrayList<>();
+            if(m.isEmpty()) {
+                singleMessage.add(Message.builder()
+                                .id(id)
+                                .message("Сообщение не найдено")
+                        .build());
+            } else {
+                singleMessage.add(m.get());
+            }
+            data.put("messages", singleMessage);
+
+            Paginator.PaginatorBuilder paginator = Paginator.builder();
+            paginator.pageCount(Paginator.calculatePageCount(partnersCount.intValue(), pageSize));
+            paginator.currentPage(1);
+
+            paginator.pageSize(pageSize);
+            data.put("paginator", paginator.build());
+
+        } catch (Exception e) {
+            log.info("Exception on getting message method", e);
+            data.put("content", "error");
+            data.put("errorType", ErrorsList.SERVICE_NOT_AVAILABLE.getDescription());
+        }
+
+        return render(data);
+    }
+
     @Operation(
             summary = "Получить список партнёров",
             description = "Возвращает список партнёров"
@@ -214,9 +254,9 @@ public class FeedbackController extends MainController{
                         .build()
         ));
 
-        messageUIS.forEach(messageUI -> {
-            Message m = feedbackService.addMessage(messageUI);
-            if(m != null) ticketService.createTicket(m);
+        List<Message> m = feedbackService.addMessages(messageUIS);
+        m.forEach(msg -> {
+            if(msg != null) ticketService.createTicket(msg);
         });
 
         return getMessagesListUIWithoutPages();

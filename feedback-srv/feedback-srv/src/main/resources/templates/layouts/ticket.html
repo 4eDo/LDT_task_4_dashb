@@ -7,5 +7,8 @@
             <th:block th:replace="fragments/paginator :: paginator"></th:block>
             <th:block th:replace="/content/ticket/main :: content"></th:block>
         </th:block>
+        <th:block th:if="${#strings.equals(data.get('content'), 'editComment')}">
+            <th:block th:replace="/content/ticket/editCommentPage :: content"></th:block>
+        </th:block>
     </th:block>
 </th:block>

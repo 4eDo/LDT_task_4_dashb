@@ -13,8 +13,9 @@ public enum ErrorsList {
 
     POSTAMAT_NOT_FOUND("Postamat not found"),
 
-    PARTNER_NOT_FOUND("Partner not found");
+    PARTNER_NOT_FOUND("Partner not found"),
 
+    TICKET_NOT_FOUND ("Ticket not found") ;
     private final String description;
 
     ErrorsList(String description) {

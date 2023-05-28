@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -30,11 +29,11 @@ public class Ticket implements Serializable {
     @ManyToOne
     @JoinColumn(name = "category", referencedColumnName = "id")
     private Category category;
-    @Column(name = "partner")
+    @ManyToOne
     @JoinColumn(name = "partner", referencedColumnName = "name")
     private Partner partner;
     @Column(name="messages")
-    private ArrayList<Long> messages;
+    private Long messages;
     @Column(name="create_date")
     private Date createDate;
     @Column(name="comment")

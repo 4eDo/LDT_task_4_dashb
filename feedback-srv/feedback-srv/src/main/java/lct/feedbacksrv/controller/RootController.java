@@ -32,6 +32,12 @@ public class RootController extends MainController{
         return new ModelAndView("index", getMap("navigation", "main"));
     }
 
+    @GetMapping
+    @RequestMapping( {"/statistic"})
+    public ModelAndView getStatistic() {
+        return new ModelAndView("index", getMap("statistic", "main"));
+    }
+
 
     private Map<String, Object> getMap(String layout, String content) {
 

@@ -1,6 +1,7 @@
 package lct.feedbacksrv.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lct.feedbacksrv.apiModels.MessageUI;
 import lct.feedbacksrv.domain.Category;
 import lct.feedbacksrv.domain.Message;
@@ -19,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -108,6 +108,43 @@ public class FeedbackServiceImpl implements FeedbackService {
         return null;
     }
 
+    @Override
+    public List<Message> addMessages(List<MessageUI> messageUIS) {
+        List<Message> messages = new ArrayList<>();
+        messageUIS.forEach(message -> {
+            try{
+                Message.MessageBuilder m = Message.builder();
+                if(message.hasUsername()) {
+                    m.username(message.getUsername());
+                }
+                if(message.hasCreateDate()) {
+                    Date d = stringToDate(message.getCreateDate());
+                    m.createDate(d);
+                } else {
+                    m.createDate(new Date());
+                }
+                if(message.hasPostamat()) {
+                    Optional<Postamat> p = postamatRepository.findById(message.getPostamat());
+                    p.ifPresent(m::postamat);
+                }
+                if(message.hasOrderId()) { m.orderId(message.getOrderId()); }
+                if(message.hasMessage()) { m.message(message.getMessage()); }
+                if(message.hasStars()) { m.stars(message.getStars()); }
+                if(message.hasPartner()) {
+                    Optional<Partner> p = partnerRepository.findById(message.getPartner());
+                    p.ifPresent(m::partner);
+                }
+                Message newMessage = messageRepository.saveAndFlush(m.build());
+
+                messages.add(newMessage);
+            } catch (Exception e) {
+                log.error("Error in addMessage method", e);
+            }
+        });
+        List<Message> done = analyzeMessages(messages);
+        return done;
+    }
+
 
     @Override
     public List<Message> getAllMessages() {
@@ -134,7 +171,80 @@ public class FeedbackServiceImpl implements FeedbackService {
         return messageRepository.count();
     }
 
-    private Message analyzeMessage(Message message) throws JsonProcessingException, ParseException {
+    private List<Message> analyzeMessages(List<Message> messages) {
+        List<Message> parsed = new ArrayList<>();
+        List<PyRequestObject> pyRequestObjects = new ArrayList<>();
+        messages.forEach(message -> {
+            if(message.getMessage().isBlank()) {
+                if(message.getStars() > 3) message.setTone(1f); // Positive
+                if(message.getStars() == 3) message.setTone(2f);// Neutral
+                if(message.getStars() < 3) message.setTone(3f); // Negative
+
+    //         TODO   message.setCategory();
+                parsed.add(message);
+            } else {
+                pyRequestObjects.add(PyRequestObject.builder()
+                        .id(message.getId())
+                        .comment(message.getMessage())
+                        .build());
+            }
+        });
+
+            String json = null;
+            try {
+                json = objectMapper.writeValueAsString(pyRequestObjects);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
+            List<PyResponseObject> respList = new ArrayList<>();
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", "application/json;charset=WINDOWS-1251");
+            try{
+                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                RequestBody requestBody = RequestBody.create(JSON, json);
+
+                Request request = new Request.Builder()
+                        .url(String.format("http://%s:%s/api/post/", serviceHost, servicePort))
+                        .post(requestBody)
+                        .build();
+                OkHttpClient client = new OkHttpClient();
+                try (Response response = client.newCall(request).execute()) {
+                    ResponseBody body = response.body();
+                    log.info("body: {}", body);
+                    JSONParser parser = new JSONParser();
+                    JSONArray respData = (JSONArray) parser.parse((String) body.string());
+                    log.info("Resp: {}", respData);
+                    respList = objectMapper.readValue(respData.toString(),
+                            new TypeReference<List<PyResponseObject>>() {});
+                    log.info("respList: {}", respList);
+
+                    if(!respList.isEmpty()) {
+                        respList.forEach(pyResponseObject -> {
+                            Message message = messageRepository.getById(pyResponseObject.getId());
+                            log.info("respObj {}", pyResponseObject);
+                            message.setTone(pyResponseObject.getTone_predicted());
+                            if(pyResponseObject.getProblem_predicted() != null) {
+                                String code = String.valueOf(pyResponseObject.getProblem_predicted());
+                                log.info("code {}", code);
+                                Optional<Category> c = categoryRepository
+                                        .findByCode(String.valueOf(pyResponseObject.getProblem_predicted().intValue()))
+                                        .stream()
+                                        .findFirst();
+                                c.ifPresent(message::setCategory);
+                                parsed.add(messageRepository.saveAndFlush(message));
+                            }
+                        });
+                    }
+                }
+            } catch (Exception ex) {
+                log.error("error on analyse method: ", ex);
+            }
+        return parsed;
+    }
+
+    private Message analyzeMessage(Message message) throws JsonProcessingException {
         if(message.getMessage().isBlank()) {
             if(message.getStars() > 3) message.setTone(1f); // Positive
             if(message.getStars() == 3) message.setTone(2f);// Neutral
@@ -152,7 +262,6 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json;charset=WINDOWS-1251");
-//        headers.put("content-length", String.format("%d", json.getBytes().length));
         try{
             MediaType JSON = MediaType.parse("application/json; charset=utf-8");
             RequestBody requestBody = RequestBody.create(JSON, json);
@@ -168,7 +277,8 @@ public class FeedbackServiceImpl implements FeedbackService {
                 JSONParser parser = new JSONParser();
                 JSONArray respData = (JSONArray) parser.parse((String) body.string());
                 log.info("Resp: {}", respData);
-                respList = objectMapper.readValue(respData.toString(), List.class);
+                respList = objectMapper.readValue(respData.toString(),
+                        new TypeReference<List<PyResponseObject>>() {});
                 log.info("respList: {}", respList);
 
                 if(!respList.isEmpty()) {
@@ -176,8 +286,10 @@ public class FeedbackServiceImpl implements FeedbackService {
                     log.info("respObj {}", pyResponseObject);
                     message.setTone(pyResponseObject.getTone_predicted());
                     if(pyResponseObject.getProblem_predicted() != null) {
+                        String code = String.valueOf(pyResponseObject.getProblem_predicted());
+                        log.info("code {}", code);
                         Optional<Category> c = categoryRepository
-                                .findByCode(String.valueOf(pyResponseObject.getCategory_predicted().intValue()))
+                                .findByCode(String.valueOf(pyResponseObject.getProblem_predicted().intValue()))
                                 .stream()
                                 .findFirst();
                         c.ifPresent(message::setCategory);
@@ -187,16 +299,6 @@ public class FeedbackServiceImpl implements FeedbackService {
         } catch (Exception ex) {
             log.error("err, ", ex);
         }
-//        RestResponse response = restClient.post(String.format("/api/post/%s", json), params, headers);
-//        if (response.getStatus() == HttpStatus.OK.value()) {
-//            if (response.getStatus() == HttpStatus.OK.value()) {
-//                JSONParser parser = new JSONParser();
-//                JSONObject respData = (JSONObject) parser.parse((String) response.getData());
-//                log.info("Resp: {}", respData);
-//            }
-//        }
-// todo oooooooooooooooooooooo
-        message.setTone(2f);
         return message;
     }
 }

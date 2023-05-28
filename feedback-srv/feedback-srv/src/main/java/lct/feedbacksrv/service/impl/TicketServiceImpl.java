@@ -90,12 +90,11 @@ public class TicketServiceImpl implements TicketService {
     public void createTicket(Message m) {
         if(m.getTone() < 2) return;
         Ticket.TicketBuilder ticket = Ticket.builder();
-        ArrayList<Long> messages = new ArrayList<>();
-        messages.add(m.getId());
-        ticket.messages(messages);
+        ticket.messages(m.getId());
         ticket.partner(m.getPartner());
         ticket.createDate(new Date());
         ticket.category(m.getCategory());
-        ticketRepository.saveAndFlush(ticket.build());
+        Ticket t = ticketRepository.saveAndFlush(ticket.build());
+        log.info("Отзыв не положительный; Тикет №{} создан", t.getId());
     }
 }

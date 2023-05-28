@@ -1,0 +1,26 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content" th:with="ticket=${data.get('ticket')}">
+    <style>
+    section {
+        border-radius: 1em;
+        padding: 1em;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%) }
+  </style>
+    <section>
+        <p class="block attention">ИЗМЕНЕНИЕ КОММЕНТАРИЯ К ТИКЕТУ</p>
+        <form name="editForm"
+            id="editForm"
+            th:action="@{${'/ticket/edit/' + ticket.id}}"
+              method="post">
+            <p><textarea
+                    name="comment"
+                    id="comment"
+                    form="editForm"
+                    th:text="${ticket.comment}"></textarea></p>
+            <button type="submit">ИЗМЕНИТЬ КОММЕНТАРИЙ</button>
+        </form>
+    </section>
+</th:block>
