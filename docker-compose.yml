@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  postgres:
+    image: "postgres:15"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+    volumes:
+      - ./docker/postgres_init_scripts:/docker-entrypoint-initdb.d
+  python-imagename:
+    image: python-imagename:latest
+    ports:
+      - "6543:6543"
+  feedback-srv:
+    image: feedback-srv-0.0.1:latest
+    ports:
+      - "11111:11111"
+    expose:
+      - "11111"
+    environment:
+      DB_HOST: "0.0.0.0"
