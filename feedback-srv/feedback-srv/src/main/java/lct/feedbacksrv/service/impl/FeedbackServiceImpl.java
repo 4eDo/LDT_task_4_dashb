@@ -98,10 +98,10 @@ public class FeedbackServiceImpl implements FeedbackService {
                 p.ifPresent(m::partner);
             }
             Message newMessage = m.build();
-
-            newMessage = analyzeMessage(newMessage);
-
-            return messageRepository.saveAndFlush(newMessage);
+            newMessage = messageRepository.saveAndFlush(newMessage);
+            List<Message> singleList = new ArrayList<>();
+            singleList.add(newMessage);
+            analyzeMessages(List.of(newMessage));
         } catch (Exception e) {
             log.error("Error in addMessage method", e);
         }
@@ -234,6 +234,15 @@ public class FeedbackServiceImpl implements FeedbackService {
                                         .findFirst();
                                 c.ifPresent(message::setCategory);
                                 parsed.add(messageRepository.saveAndFlush(message));
+                            } else {
+                                String code = "-";
+                                log.info("code {}", code);
+                                Optional<Category> c = categoryRepository
+                                        .findByCode(code)
+                                        .stream()
+                                        .findFirst();
+                                c.ifPresent(message::setCategory);
+                                parsed.add(messageRepository.saveAndFlush(message));
                             }
                         });
                     }
@@ -242,63 +251,5 @@ public class FeedbackServiceImpl implements FeedbackService {
                 log.error("error on analyse method: ", ex);
             }
         return parsed;
-    }
-
-    private Message analyzeMessage(Message message) throws JsonProcessingException {
-        if(message.getMessage().isBlank()) {
-            if(message.getStars() > 3) message.setTone(1f); // Positive
-            if(message.getStars() == 3) message.setTone(2f);// Neutral
-            if(message.getStars() < 3) message.setTone(3f); // Negative
-
-//         TODO   message.setCategory();
-            return message;
-        }
-
-        List<PyRequestObject> pyRequestObjects = new ArrayList<>();
-        pyRequestObjects.add(PyRequestObject.builder().id(1L).comment(message.getMessage()).build());
-        String json = objectMapper.writeValueAsString(pyRequestObjects);
-
-        List<PyResponseObject> respList = new ArrayList<>();
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json;charset=WINDOWS-1251");
-        try{
-            MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-            RequestBody requestBody = RequestBody.create(JSON, json);
-
-            Request request = new Request.Builder()
-                    .url(String.format("http://%s:%s/api/post/", serviceHost, servicePort))
-                    .post(requestBody)
-                    .build();
-            OkHttpClient client = new OkHttpClient();
-            try (Response response = client.newCall(request).execute()) {
-                ResponseBody body = response.body();
-                log.info("body: {}", body);
-                JSONParser parser = new JSONParser();
-                JSONArray respData = (JSONArray) parser.parse((String) body.string());
-                log.info("Resp: {}", respData);
-                respList = objectMapper.readValue(respData.toString(),
-                        new TypeReference<List<PyResponseObject>>() {});
-                log.info("respList: {}", respList);
-
-                if(!respList.isEmpty()) {
-                    PyResponseObject pyResponseObject = respList.get(0);
-                    log.info("respObj {}", pyResponseObject);
-                    message.setTone(pyResponseObject.getTone_predicted());
-                    if(pyResponseObject.getProblem_predicted() != null) {
-                        String code = String.valueOf(pyResponseObject.getProblem_predicted());
-                        log.info("code {}", code);
-                        Optional<Category> c = categoryRepository
-                                .findByCode(String.valueOf(pyResponseObject.getProblem_predicted().intValue()))
-                                .stream()
-                                .findFirst();
-                        c.ifPresent(message::setCategory);
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            log.error("err, ", ex);
-        }
-        return message;
     }
 }

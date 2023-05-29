@@ -5,9 +5,6 @@ services:
     image: "postgres:15"
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: root
-      POSTGRES_USER: root
     volumes:
       - ./docker/postgres_init_scripts:/docker-entrypoint-initdb.d
   python-imagename:
@@ -21,5 +18,4 @@ services:
     expose:
       - "11111"
     environment:
-      DB_HOST: "host.docker.internal"
       PY_HOST: "host.docker.internal"

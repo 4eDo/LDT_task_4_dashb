@@ -62,7 +62,7 @@
                     <p th:if="${message.category == null}"><span>Не определено</span></p>
                 </td>
                 <td valign="center" class="">
-                    <p th:if="${(message.tone > -1) && message.tone < 1.5}">Положительно</p>
+                    <p th:if="${(message.tone > -1) && message.tone < 2}">Положительно</p>
                     <p th:if="${(message.tone > -1) && !(message.tone < 1.5) && !(message.tone > 2.5)}">Нейтрально</p>
                     <p th:if="${(message.tone > -1) && message.tone > 2.5}">Отрицательно</p>
                     <p th:if="${!(message.tone > -1)}">Не определено</p>

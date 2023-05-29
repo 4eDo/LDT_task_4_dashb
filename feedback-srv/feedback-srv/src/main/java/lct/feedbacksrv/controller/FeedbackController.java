@@ -207,10 +207,13 @@ public class FeedbackController extends MainController{
         stars.ifPresent(messageUI::setStars);
         partner.ifPresent(messageUI::setPartner);
 
-        Message m = feedbackService.addMessage(messageUI);
-        if(m != null) {
-            ticketService.createTicket(m);
-            return ResponseEntity.status(HttpStatus.OK).body(m);
+        List<MessageUI> unparsed = new ArrayList<>();
+        unparsed.add(messageUI);
+        List<Message> parsed = feedbackService.addMessages(unparsed);
+        parsed.forEach(m -> {ticketService.createTicket(m);});
+        if(!parsed.isEmpty()) {
+
+            return ResponseEntity.status(HttpStatus.OK).body(parsed.get(0));
         } else {
             return ResponseEntity.badRequest().build();
         }
