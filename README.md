@@ -38,5 +38,5 @@ Swagger позволяет автоматически генерировать p
 ## Прототипы
 [Figma](https://www.figma.com/proto/S25HRHxvDzP42He4jZ6a0J/%D0%9C%D0%BE%D1%81%D0%BF%D0%BE%D1%81%D1%82%D0%BE%D0%BC%D0%B0%D1%82.-%D0%9E%D0%B1%D1%80%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D1%81%D0%B2%D1%8F%D0%B7%D1%8C.?type=design&node-id=63-21329&scaling=scale-down&page-id=0%3A1&starting-point-node-id=123%3A21076)
 
-[Ссылка на прототип](http://178.170.196.229:11111/)
+[Ссылка на прототип](http://178.170.196.229:11117/)
 
