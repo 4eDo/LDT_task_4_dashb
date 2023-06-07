@@ -48,4 +48,5 @@ public class Postamat implements Serializable {
     @Column(name="is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
+
 }

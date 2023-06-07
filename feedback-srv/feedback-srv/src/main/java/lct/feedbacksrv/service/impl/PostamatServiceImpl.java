@@ -2,6 +2,10 @@ package lct.feedbacksrv.service.impl;
 
 import lct.feedbacksrv.domain.Postamat;
 import lct.feedbacksrv.repository.PostamatRepository;
+import lct.feedbacksrv.resource.mapTemplates.YaFeature;
+import lct.feedbacksrv.resource.mapTemplates.YaGeometryPoint;
+import lct.feedbacksrv.resource.mapTemplates.YaObject;
+import lct.feedbacksrv.resource.mapTemplates.YaProperties;
 import lct.feedbacksrv.service.PostamatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * TODO: Add class description
@@ -97,5 +102,41 @@ public class PostamatServiceImpl implements PostamatService {
     @Override
     public Long getCount() {
         return postamatRepository.existsCount();
+    }
+
+    @Override
+    public YaObject getMapData() {
+        YaObject map = new YaObject();
+        List<YaFeature> features = new ArrayList<>();
+
+        AtomicLong id = new AtomicLong(0);
+        postamatRepository.findExists().forEach(postamat -> {
+            YaProperties properties = new YaProperties();
+            properties.setBalloonContentHeader("Информация о постамате");
+            properties.setBalloonContentFooter("Демонстрационная версия сервиса обработки обратной связи. Команда 'Дашбордизация'");
+            properties.setHintContent("Информация о постамате");
+            properties.setBalloonContentBody(getHtmlInfo(postamat));
+            properties.setClusterCaption(String.format("Рядом: [%s]", postamat.getAddress()));
+            YaFeature.YaFeatureBuilder temp = YaFeature.builder();
+            temp.id(id.getAndIncrement());
+            temp.properties(properties);
+
+            YaGeometryPoint point = new YaGeometryPoint();
+            point.setCoordinates(new Double[]{postamat.getLatitude(), postamat.getLongitude()});
+            temp.geometry(point);
+            features.add(temp.build());
+        });
+        map.setFeatures(features);
+        return map;
+    }
+
+    private String getHtmlInfo(Postamat p) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("<p>Адрес установки: %s</p>", p.getAddress()));
+        sb.append(String.format("<p>Почтовый индекс: %s</p>", p.getPostIndex()));
+        sb.append(String.format("<p>%s, %s</p>", p.getLatitude(), p.getLongitude()));
+        sb.append(String.format("<p>Локация: %s</p>", p.getLocation()));
+        sb.append(String.format("<p>Тип постамата: %s</p>", p.getType()));
+        return sb.toString();
     }
 }

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static lct.feedbacksrv.resource.RandomGenerators.*;
+import static lct.feedbacksrv.resource.Utils.objectMapper;
 import static lct.feedbacksrv.resource.Utils.stringToDate;
 
 /**
@@ -112,6 +113,32 @@ public class PostamatController extends MainController {
         }
 
         return render(data);
+
+    }
+
+    @GetMapping(path={"/map"})
+    @ApiIgnore
+    public ModelAndView getMapPageUI() {
+        log.info("Get postamats on map");
+
+        Map<String, Object> data = getHeaderMap();
+        data.put("content", "map");
+
+        return render(data);
+
+    }
+
+    @GetMapping(path={"/getjsonmap"})
+    public String getMapJson() {
+        log.info("Get json");
+
+        try {
+            return objectMapper.writeValueAsString(postamatService.getMapData());
+
+        } catch (Exception e) {
+            log.error("Exception on getting map method", e);
+            return null;
+        }
 
     }
 
@@ -315,7 +342,7 @@ public class PostamatController extends MainController {
                             i + 1, getRandIntInRange(1, 100)));
                     p.ipAddress(getRandomIp());
                     p.postIndex(String.format("%d",
-                            getRandIntInRange(100000, 999999)));
+                            getRandIntInRange(101000, 155599)));
                     p.longitude(getRandMoscowLongitude());
                     p.latitude(getRandMoscowLatitude());
                     p.setupDate(getRandDate());

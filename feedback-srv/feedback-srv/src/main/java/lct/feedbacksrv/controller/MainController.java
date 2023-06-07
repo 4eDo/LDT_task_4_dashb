@@ -25,6 +25,8 @@ abstract class MainController extends CommonController {
 
     @Value("${spring.http.multipart.max-file-size}")
     private String maxFileSize;
+    @Value("${feedback.yandex.map.api-key}")
+    private String yMapApiKey;
 
     protected ModelAndView render(Map<String, Object> data) {
         return render("index", data);
@@ -35,6 +37,7 @@ abstract class MainController extends CommonController {
         Map<String, Object> map = new HashMap<>();
         map.put("layout", layout);
         map.put("maxFileSize", maxFileSize);
+        map.put("yMapApiKey", yMapApiKey);
         map.put("data", data);
 
         return new ModelAndView(view, map);
@@ -42,6 +45,8 @@ abstract class MainController extends CommonController {
 
     protected Map<String, Object> getHeaderMap() {
         Map<String, Object> data = new HashMap<>();
+        data.put("maxFileSize", maxFileSize);
+        data.put("yMapApiKey", yMapApiKey);
 
         return data;
     }

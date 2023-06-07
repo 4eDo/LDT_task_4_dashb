@@ -1,5 +1,6 @@
 <th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content" th:with="action=${data.get('action')}">
-    <h2 th:text="${action}">Add or edit</h2>
+    <h2 th:if="${action == 'add'}">Добавить нового партнёра</h2>
+    <h2 th:if="${action == 'edit'}" th:text="'Партнёр «' + ${data.get('partner').name} + '»'">Partner name</h2>
     <form method="post"
           name="editForm"
           id="editForm"
@@ -15,7 +16,7 @@
         <tr class="">
             <td class="name_td">Имя организации</td>
             <td valign="center" class="">
-                <p><input type="text" name="name" th:value="${partner.name}" required></p>
+                <p><input type="text" name="name" th:value="${partner.name}" required readonly hidden></p>
             </td>
         </tr>
         <tr class="">
