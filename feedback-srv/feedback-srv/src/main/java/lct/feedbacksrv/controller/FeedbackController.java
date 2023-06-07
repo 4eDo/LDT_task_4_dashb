@@ -7,10 +7,7 @@ import lct.feedbacksrv.domain.Message;
 import lct.feedbacksrv.resource.ErrorsList;
 import lct.feedbacksrv.resource.Paginator;
 import lct.feedbacksrv.resource.csv.CSVFileReader;
-import lct.feedbacksrv.service.FeedbackService;
-import lct.feedbacksrv.service.PartnerService;
-import lct.feedbacksrv.service.PostamatService;
-import lct.feedbacksrv.service.TicketService;
+import lct.feedbacksrv.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +50,8 @@ public class FeedbackController extends MainController{
     PartnerService partnerService;
     @Autowired
     TicketService ticketService;
+    @Autowired
+    CsvReaderService csvReaderService;
 
     @GetMapping
     @ApiIgnore
@@ -207,13 +206,9 @@ public class FeedbackController extends MainController{
         stars.ifPresent(messageUI::setStars);
         partner.ifPresent(messageUI::setPartner);
 
-        List<MessageUI> unparsed = new ArrayList<>();
-        unparsed.add(messageUI);
-        List<Message> parsed = feedbackService.addMessages(unparsed);
-        parsed.forEach(m -> {ticketService.createTicket(m);});
-        if(!parsed.isEmpty()) {
-
-            return ResponseEntity.status(HttpStatus.OK).body(parsed.get(0));
+        Message m = feedbackService.messageUItoMessage(messageUI);
+        if(m != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(m);
         } else {
             return ResponseEntity.badRequest().build();
         }
@@ -234,6 +229,32 @@ public class FeedbackController extends MainController{
     @PostMapping(path = {"/file"}, produces = "text/csv")
     @ResponseBody
     public ModelAndView importMessages(@RequestParam(name = "file") MultipartFile file) throws IOException {
+        log.info("Create from file");
+
+        if (file.isEmpty()) {
+            String msg = "Messages import CSV file is empty";
+            log.error(msg);
+            Map<String, Object> data = getHeaderMap();
+            data.put("content", "error");
+            data.put("errorType", ErrorsList.EMPTY_FILE.getDescription());
+            return render(data);
+        }
+
+        boolean isOk = csvReaderService.decodeMessages(file);
+        if(isOk) {
+            return getMessagesListUIWithoutPages();
+        } else {
+            Map<String, Object> data = getHeaderMap();
+            data.put("content", "error");
+            data.put("errorType", ErrorsList.ERROR_ON_PARSE_FILE.getDescription());
+            return render(data);
+        }
+
+    }
+
+    @PostMapping(path = {"/file/old"}, produces = "text/csv")
+    @ResponseBody
+    public ModelAndView importMessagesOld(@RequestParam(name = "file") MultipartFile file) throws IOException {
         log.info("Create requests");
 
         if (file.isEmpty()) {

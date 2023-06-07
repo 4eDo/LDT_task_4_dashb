@@ -1,5 +1,7 @@
 <th:block xmlns:th="http://www.w3.org/1999/xhtml">
     <th:block th:fragment="head">
+
+        <script type="text/javascript" th:src="'/js/statistic/main.js?' + ${now}"></script>
     </th:block>
     <th:block th:fragment="content">
         <th:block th:replace="content/statistic/main :: content"></th:block>

@@ -8,14 +8,18 @@ services:
     volumes:
       - ./docker/postgres_init_scripts:/docker-entrypoint-initdb.d
   python-imagename:
-    image: python-imagename:latest
+    image: python-imagename-1:1
     ports:
       - "6543:6543"
   feedback-srv:
-    image: feedback-srv-0.0.1:latest
+    image: feedback-srv-0.0.7:latest
     ports:
-      - "11111:11111"
+      - "11117:11117"
     expose:
-      - "11111"
+      - "11117"
     environment:
+      SERVER_PORT: "11117"
+      DB_HOST: "87.242.126.38"
+      DB_USERNAME: "root"
+      DB_PASSWORD: "1230907Anton!"
       PY_HOST: "host.docker.internal"

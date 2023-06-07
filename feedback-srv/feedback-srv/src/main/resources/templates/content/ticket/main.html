@@ -7,7 +7,7 @@
             <td>Дата создания</td>
             <td>Категория</td>
             <td>Партнёр</td>
-            <td>Сообщение</td>
+            <td>Сообщения</td>
             <td>Комментарий</td>
             <td>Действие</td>
         </tr>
@@ -28,10 +28,10 @@
                 </td>
                 <td valign="center" class="">
                     <p><span th:text="${ticket.partner.name}">ПАРТНЁР</span></p>
-                    <p class="muted italic" th:if="${ticket.partner.isDeleted}" th:text="${message.partner.description}"></p>
+                    <p class="muted italic" th:if="${ticket.partner.isDeleted}" th:text="${ticket.partner.description}"></p>
                 </td>
                 <td valign="center" class="">
-                    <p><a th:href="${'/feedback/info/' + msg}" th:each="msg : ${ticket.messages}" th:text="${msg}"></a></p>
+                    <p><a class="red_line" th:title="${'Перейти к отзыву ' + msg}" th:href="${'/feedback/info/' + msg}" th:each="msg : ${ticket.getMessagesArr()}" th:text="${msg}"></a></p>
                 </td>
                 <td valign="center" class="">
                     <p><span th:text="${ticket.comment}"></span></p>

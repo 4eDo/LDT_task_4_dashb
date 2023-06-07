@@ -16,6 +16,7 @@
             <td>Оценка</td>
             <td>Тип обращения</td>
             <td>Характер сообщения</td>
+            <td>Связанные тикеты</td>
         </tr>
         </thead>
         <th:block th:each="message : ${messages}" th:fragment="next">
@@ -66,6 +67,9 @@
                     <p th:if="${(message.tone > -1) && !(message.tone < 1.5) && !(message.tone > 2.5)}">Нейтрально</p>
                     <p th:if="${(message.tone > -1) && message.tone > 2.5}">Отрицательно</p>
                     <p th:if="${!(message.tone > -1)}">Не определено</p>
+                </td>
+                <td valign="center" class="">
+                    <p><a class="red_line" th:title="${'Перейти к тикету ' + ticket}" th:href="${'/ticket/info/' + ticket}" th:each="ticket : ${message.getTicketsArr()}" th:text="${ticket}"></a></p>
                 </td>
             </tr>
         </th:block>

@@ -13,7 +13,7 @@ import java.util.Optional;
  */
 public interface FeedbackService {
    Optional<Message> getMessage(Long id);
-   Message addMessage(MessageUI message);
+   Message messageUItoMessage(MessageUI message);
    List<Message> addMessages(List<MessageUI> messageUIS);
    List<Message> getAllMessages();
    List<Message> getMessagesByLimitAndOffset(int limit, int offset);

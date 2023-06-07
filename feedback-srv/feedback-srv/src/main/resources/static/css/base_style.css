@@ -188,3 +188,18 @@ button:hover {
   filter: contrast(0) brightness(2);
   margin-right: 10px;
 }
+
+.red_line {
+    /*text-decoration: underline solid #FF1935 !important;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 3px !important;
+    display: block;*/
+    display: inline-block;
+    padding: 5px;
+    border: 1px solid #FF19352f;
+    border-radius: 4px;
+    margin: 5px;
+}
+.red_line:hover {
+    border: 1px solid #FF1935;
+}
