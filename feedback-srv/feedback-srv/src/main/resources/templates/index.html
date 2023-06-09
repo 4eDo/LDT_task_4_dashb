@@ -16,7 +16,11 @@
     <link rel="stylesheet" type="text/css" th:href="'/css/base_style.css'">
     <link rel="stylesheet" type="text/css" th:href="'/css/style_1.css'">
 
+    <th:block th:replace="fragments/vars :: head"></th:block>
+
     <script type="text/javascript" th:src="'/js/core/jquery.min.js?' + ${now}"></script>
+    <script type="text/javascript" th:src="'/js/core/main.js?' + ${now}"></script>
+    <script type="text/javascript" th:src="'/js/core/checks.js?' + ${now}"></script>
     <script type="text/javascript" th:src="'/js/menu.js?' + ${now}"></script>
 <!--    <script type="text/javascript" th:src="'https://4edo.github.io/scripts/lazyinit.js?' + ${now}"></script>-->
 
@@ -24,6 +28,7 @@
 </head>
 <body class="TTFirsNeue">
 <header th:replace="fragments/header :: header"></header>
+<div id="m_menu_bt"><span title="Меню" class="material-icons">menu</span></div>
 <th:block th:replace="fragments/navbar :: navbar"></th:block>
 <main class="d-flex main-content js-main-content TTFirsNeue">
     <th:block th:if="${#strings.equals(data.get('content'), 'error')}">
@@ -32,5 +37,19 @@
 
     <th:block th:replace="${'layouts/' + layout} :: content"></th:block>
 </main>
+
+
+<script>
+        if ($('#m_menu_bt').css('display') == "block") {
+            $('#hm_bts').addClass('hide');
+        }
+        else {
+            $('#hm_bts').removeClass('hide');
+        };
+
+        $('#m_menu_bt').on('click', function() {
+            $('#hm_bts').toggleClass ("hide");
+        });
+    </script>
 </body>
 </html>

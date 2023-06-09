@@ -36,4 +36,7 @@ public class Partner implements Serializable {
     @Column(name="is_deleted")
     @Builder.Default
     private Boolean isDeleted = false;
+    @Column(name="negative_percent")
+    @Builder.Default
+    private Double negativePercent = 0d;
 }

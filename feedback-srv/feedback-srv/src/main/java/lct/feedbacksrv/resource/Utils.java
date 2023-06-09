@@ -5,6 +5,7 @@ import lct.feedbacksrv.csvTemplates.PostamatTemplate;
 import lct.feedbacksrv.domain.Postamat;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -80,5 +81,10 @@ public class Utils {
         value = value * factor;
         long tmp = (long) value;
         return (double) tmp / factor;
+    }
+
+    public static Double roundTail(double value, int tail){
+        return truncate(BigDecimal.valueOf(value)
+                .setScale(tail, RoundingMode.HALF_EVEN).doubleValue(),tail);
     }
 }

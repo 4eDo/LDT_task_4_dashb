@@ -24,4 +24,16 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     @Query(value="SELECT * FROM messages WHERE NOT (status IS NOT NULL);", nativeQuery = true)
     List<Message> findMessagesWithoutStatus();
+
+    @Query(value="SELECT count(*) FROM messages WHERE postamat = ?1", nativeQuery = true)
+    Long findMessagesCountByPostamat(String postamatId);
+
+    @Query(value="SELECT count(*) FROM messages WHERE postamat = ?1 AND category IN (SELECT id FROM categories WHERE archetype = 'PM_BUG')", nativeQuery = true)
+    Long findMessagesCountWithPostamatBug(String postamatId);
+
+    @Query(value="SELECT count(*) FROM messages WHERE partner = ?1", nativeQuery = true)
+    Long findMessagesCountByPartner(String partnerName);
+
+    @Query(value="SELECT count(*) FROM messages WHERE partner = ?1 AND category IN (SELECT id FROM categories WHERE archetype = 'PARTNER_BUG')", nativeQuery = true)
+    Long findMessagesCountWithPartnerBug(String partnerName);
 }

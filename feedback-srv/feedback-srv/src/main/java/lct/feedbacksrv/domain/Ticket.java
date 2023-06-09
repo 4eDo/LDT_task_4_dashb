@@ -45,6 +45,9 @@ public class Ticket implements Serializable {
     @Column(name="is_closed")
     @Builder.Default
     private Boolean isClosed = false;
+    @ManyToOne
+    @JoinColumn(name = "subcat", referencedColumnName = "id")
+    private Category subcat;
 
     public List<String> getMessagesArr(){
         return StringUtils.isNotBlank(messages) ? List.of(messages.split("-")) : Collections.emptyList();

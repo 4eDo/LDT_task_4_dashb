@@ -20,7 +20,7 @@
             <p>Вес файла не может превышать <span th:text="${data.get('maxFileSize')}">2 МБ</span></p>
             <p>Обработка файла займёт некоторое время.</p>
             <input type="file" id="file" name="file" accept=".csv">
-            <button type="submit">ИМПОРТИРОВАТЬ csv</button>
+            <button id="fileBtn" class="disabled" type="submit" disabled="true" title='Прикрепите файл'>ИМПОРТИРОВАТЬ csv</button>
         </form>
     </section>
 </th:block>

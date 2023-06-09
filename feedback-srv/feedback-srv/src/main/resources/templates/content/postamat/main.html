@@ -1,11 +1,11 @@
 <th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content">
-    <p><a class="button" href="/postamat/add">Добавить один</a></p>
-    <p><a class="button" id="generateRand" href="#">Сгенерировать случайно</a></p>
+    <p><a class="button block" href="/postamat/add">Добавить один</a></p>
+    <p><a class="button block" id="generateRand" href="#">Сгенерировать случайно</a></p>
 
-    <table id="postamattable" class="" th:with="postamats=${data.get('postamats')}">
+    <table cellspacing="0" id="postamattable" class="" th:with="postamats=${data.get('postamats')}">
         <thead>
         <tr class="">
-            <td>Идентификатор</td>
+            <td class="t_first_cell">Идентификатор</td>
             <td>Адрес установки</td>
             <td>Почтовый индекс</td>
             <td>ip-адрес</td>
@@ -15,7 +15,8 @@
             <td>Комментарий</td>
             <td>Тип</td>
             <td>Локация</td>
-            <td>Действие</td>
+            <td title="Процент отзывов с негативной оценкой постамата от общего числа отзывов для конкретного постамата">% недовольства</td>
+            <td class="t_last_cell">Действие</td>
         </tr>
         </thead>
         <th:block th:each="postamat : ${postamats}" th:fragment="next">
@@ -33,7 +34,7 @@
                     <p><span th:text="${postamat.ipAddress}"></span></p>
                 </td>
                 <td valign="center" class="">
-                    <p><span th:text="${postamat.latitude}"></span>, <span th:text="${postamat.longitude}"></span></p>
+                    <p><span th:text="${#numbers.formatDecimal(postamat.latitude,1,6)}"></span>, <span th:text="${#numbers.formatDecimal(postamat.longitude,1,6)}"></span></p>
                 </td>
                 <td valign="center" class="">
                     <p th:if="${postamat.setupDate != null}">
@@ -52,6 +53,9 @@
                 </td>
                 <td valign="center" class="">
                     <p><span th:text="${postamat.location}"></span></p>
+                </td>
+                <td valign="center" class="" th:title="'Данные обновляются раз в ' + ${data.get('recheckNegativeMin')} + ' мин.'">
+                    <p><span th:text="${postamat.negativePercent > 0 ? #numbers.formatDecimal(postamat.negativePercent,1,2) : 'Не определено'}"></span></p>
                 </td>
                 <td valign="center" class="">
                     <p>

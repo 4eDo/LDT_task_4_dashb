@@ -22,4 +22,6 @@ public interface PostamatService {
     Long getCount();
 
     YaObject getMapData();
+
+    Optional<Postamat> getPostamat(String id);
 }

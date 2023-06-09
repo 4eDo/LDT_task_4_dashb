@@ -5,7 +5,7 @@
           name="editForm"
           id="editForm"
           th:action="@{${'/postamat/' + action}}">
-    <table id="postamattable" class="" th:with="postamat=${data.get('postamat')}">
+    <table cellspacing="0" id="postamattable" class="" th:with="postamat=${data.get('postamat')}">
 
         <tr class="" th:if="${action == 'edit'}">
             <td class="name_td">Идентификатор</td>

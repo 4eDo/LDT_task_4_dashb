@@ -70,6 +70,10 @@ public class Message implements Serializable {
     @Column(name="tickets")
     private String tickets;
 
+    @ManyToOne
+    @JoinColumn(name = "subcat", referencedColumnName = "id")
+    private Category subcat;
+
     public List<String> getTicketsArr(){
         return StringUtils.isNotBlank(tickets) ? List.of(tickets.split("-")) : Collections.emptyList();
     }

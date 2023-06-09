@@ -34,5 +34,5 @@ public class Category implements Serializable {
 @Column(name="archetype")
     private String archetype;
     @Column(name="parent")
-    private Integer parent;
+    private Long parent;
 }

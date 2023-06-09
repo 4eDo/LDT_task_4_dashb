@@ -7,10 +7,7 @@ import lct.feedbacksrv.domain.Category;
 import lct.feedbacksrv.domain.Message;
 import lct.feedbacksrv.domain.Partner;
 import lct.feedbacksrv.domain.Postamat;
-import lct.feedbacksrv.repository.CategoryRepository;
-import lct.feedbacksrv.repository.MessageRepository;
-import lct.feedbacksrv.repository.PartnerRepository;
-import lct.feedbacksrv.repository.PostamatRepository;
+import lct.feedbacksrv.repository.*;
 import lct.feedbacksrv.resource.AsyncParameters;
 import lct.feedbacksrv.resource.PyRequestObject;
 import lct.feedbacksrv.resource.PyResponseObject;
@@ -60,6 +57,8 @@ public class FeedbackServiceImpl implements FeedbackService {
     PostamatRepository postamatRepository;
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    TicketRepository ticketRepository;
 
     private final Runtime runtime = Runtime.getRuntime();
     private final AsyncParameters asyncParameters;
@@ -70,12 +69,12 @@ public class FeedbackServiceImpl implements FeedbackService {
     @PostConstruct
     private void postConstruct() {
         showMemoryStat();
-        initOnStart();
+        scheduledExecutorService.schedule(this::initOnStart, 30, TimeUnit.SECONDS);
         checkStatusesPrimo();
         checkStatusesSecundo();
     }
 
-    private void initOnStart() {
+    public void initOnStart() {
         try{
             log.info("~~~~~~~~ INIT ON START AND FIX BUGS ~~~~~~~");
             // Маркируем то, что было ранее.
@@ -277,18 +276,78 @@ public class FeedbackServiceImpl implements FeedbackService {
         return messageRepository.count();
     }
 
+    @Override
+    public void updCategory(Long id, Long newCategory, Boolean needTicket) {
+        Optional<Message> message = messageRepository.findById(id);
+        if(message.isEmpty()) return;
+        Message newMessage = message.get();
+        Optional<Category> sub = categoryRepository.findById(newCategory);
+        if(sub.isEmpty()) return;
+        newMessage.setSubcat(sub.get());
+        newMessage.setCategory(categoryRepository.getById(sub.get().getParent()));
+        messageRepository.saveAndFlush(newMessage);
+
+        if(!newMessage.getTicketsArr().isEmpty()) {
+            List<Long> ids = new ArrayList<>();
+            newMessage.getTicketsArr().forEach(str -> {
+                try {
+                    ids.add(Long.valueOf(str));
+                } catch (Exception e) {
+                    log.error("error on parse ticket id", e);
+                }
+            });
+            ticketRepository.findAllById(ids).forEach(ticket -> {
+                if(ticket.getMessagesArr().size() < 2) {
+                    ticket.setCategory(categoryRepository.getById(sub.get().getParent()));
+                    ticket.setSubcat(sub.get());
+                    log.info("{}",ticket);
+                    ticketRepository.saveAndFlush(ticket);
+                }
+            });
+        } else if(needTicket) {
+            newMessage.setStatus("NEED_TICKET");
+            messageRepository.saveAndFlush(newMessage);
+        }
+    }
+
+    @Override
+    public Map<Long, String> getCategoriesForUi() {
+        List<Category> categories = categoryRepository.findAll();
+        Map<Long, String> out = new HashMap<>();
+        categories.forEach(category -> {
+            if(category.getCode().equals("-")) {
+                out.put(category.getId(),
+                    category.getDescription());
+            }
+            if(!Objects.equals(category.getId(), category.getParent())) {
+                Category parent = categoryRepository.getById(category.getParent());
+                out.put(category.getId(),
+                        String.format("%s: %s", parent.getDescription(), category.getDescription()));
+            }
+        });
+        return out;
+    }
+
     private List<Message> analyzeMessages(List<Message> messages) {
         if(messages.isEmpty()) return Collections.emptyList();
         List<Message> parsed = new ArrayList<>();
         List<PyRequestObject> pyRequestObjects = new ArrayList<>();
+
+        Category notBug = categoryRepository
+                .findByCode("-")
+                .stream()
+                .findFirst().get();
         messages.forEach(message -> {
-            if(message.getMessage().isBlank()) {
+            if(message.getMessage().isBlank() || message.getMessage().replace("?", "").isBlank()) {
                 if(message.getStars() > 3) message.setTone(1f); // Positive
                 if(message.getStars() == 3) message.setTone(2f);// Neutral
                 if(message.getStars() < 3) message.setTone(3f); // Negative
 
     //         TODO   message.setCategory();
-                parsed.add(message);
+                message.setStatus("TONE_CHECKED");
+                message.setCategory(notBug);
+                message.setSubcat(notBug);
+                parsed.add(messageRepository.saveAndFlush(message));
             } else {
                 pyRequestObjects.add(PyRequestObject.builder()
                         .id(message.getId())
@@ -296,7 +355,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                         .build());
             }
         });
-
+        if(pyRequestObjects.isEmpty()) return Collections.emptyList();
             String json = null;
             try {
                 json = objectMapper.writeValueAsString(pyRequestObjects);
@@ -316,7 +375,13 @@ public class FeedbackServiceImpl implements FeedbackService {
                         .url(String.format("http://%s:%s/api/post/", serviceHost, servicePort))
                         .post(requestBody)
                         .build();
-                OkHttpClient client = new OkHttpClient();
+
+                OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                builder.connectTimeout(5, TimeUnit.MINUTES) // connect timeout
+                        .writeTimeout(5, TimeUnit.MINUTES) // write timeout
+                        .readTimeout(5, TimeUnit.MINUTES); // read timeout
+
+                OkHttpClient client = builder.build();
                 try (Response response = client.newCall(request).execute()) {
                     ResponseBody body = response.body();
 //                    log.info("body: {}", body);
@@ -336,10 +401,21 @@ public class FeedbackServiceImpl implements FeedbackService {
                                 String code = String.valueOf(pyResponseObject.getProblem_predicted());
                                 log.info("code {}", code);
                                 Optional<Category> c = categoryRepository
-                                        .findByCode(String.valueOf(pyResponseObject.getProblem_predicted().intValue()))
+                                        .findParentCat(String.valueOf(pyResponseObject.getProblem_predicted().intValue()))
                                         .stream()
                                         .findFirst();
                                 c.ifPresent(message::setCategory);
+
+                                if(pyResponseObject.getCategory_predicted() != null) {
+                                    Optional<Category> sub = categoryRepository
+                                            .findSubCat(c.get().getId(), String.valueOf(pyResponseObject.getCategory_predicted().intValue()))
+                                            .stream()
+                                            .findFirst();
+                                    sub.ifPresent(message::setSubcat);
+                                } else {
+                                    c.ifPresent(message::setSubcat);
+                                }
+
                                 message.setStatus("TONE_CHECKED");
                                 parsed.add(messageRepository.saveAndFlush(message));
                             } else {
@@ -366,10 +442,11 @@ public class FeedbackServiceImpl implements FeedbackService {
                     }
                 }
             } catch (Exception ex) {
-                log.error("error on analyse method: ", ex);
+                log.error("error on analyse method: {}", ex.getMessage());
             }
         return parsed;
     }
+
 
     private void setRandData(List<Message> toSetRandData) {
         log.info("set rand data");

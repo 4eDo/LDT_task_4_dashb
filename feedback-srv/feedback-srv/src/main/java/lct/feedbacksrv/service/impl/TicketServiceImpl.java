@@ -47,6 +47,7 @@ public class TicketServiceImpl implements TicketService {
     @PostConstruct
     private void postConstruct() {
         checkStatuses();
+        checkNeeded();
     }
 
 
@@ -72,6 +73,29 @@ public class TicketServiceImpl implements TicketService {
         }
         scheduledExecutorService.schedule(this::checkStatuses, recheckSec, TimeUnit.SECONDS);
     }
+    private void checkNeeded() {
+        try {
+            int activeTasks = executorService.getActiveCount();
+            int maxTasks = asyncParameters.getPoolWorkerSize();
+            int reserved = 1; // Зарезервировано для потока, сохраняющего файл в бд!
+            int needed = maxTasks - activeTasks - reserved;
+            int chunkSize = 1000;
+            float free = calculate(runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory()));
+            boolean hasFreeMem = free > 60;
+
+            if (needed > 0 && hasFreeMem) {
+                List<Message> toCreateTickets = messageRepository.findMessagesByStatusWithLimit("NEED_TICKET", chunkSize);
+                log.info("*** [Need create tickets] Got messages count: {}, chunkSize: {}", toCreateTickets.size(), chunkSize);
+                toCreateTickets.forEach(message -> message.setStatus("CREATE_NEED_TICKET"));
+                messageRepository.saveAllAndFlush(toCreateTickets);
+                executorService.submit(() -> createNeedTickets(toCreateTickets));
+            }
+        } catch (Exception e) {
+            log.error("3 Exception on check messages status", e);
+        }
+        scheduledExecutorService.schedule(this::checkNeeded, recheckSec, TimeUnit.SECONDS);
+    }
+
     private float calculate(long targetMemory) {
         return (float) targetMemory / (float) runtime.maxMemory() * 100;
     }
@@ -154,6 +178,7 @@ public class TicketServiceImpl implements TicketService {
                 ticket.partner(m.getPartner());
                 ticket.createDate(new Date());
                 ticket.category(m.getCategory());
+                ticket.subcat(m.getSubcat());
                 Ticket t = ticketRepository.saveAndFlush(ticket.build());
                 log.info("Отзыв не положительный; Тикет №{} создан", t.getId());
                 m.addTicket(t.getId().toString());
@@ -176,6 +201,26 @@ public class TicketServiceImpl implements TicketService {
             log.error("cant create ticket for message {}", m, e);
         }
 
+    }
+
+    private void createNeedTickets(List<Message> toCreateTickets) {
+        toCreateTickets.forEach(m -> {
+            try {
+                    Ticket.TicketBuilder ticket = Ticket.builder();
+                    ticket.messages(m.getId().toString());
+                    ticket.partner(m.getPartner());
+                    ticket.createDate(new Date());
+                    ticket.category(m.getCategory());
+                    ticket.subcat(m.getSubcat());
+                    Ticket t = ticketRepository.saveAndFlush(ticket.build());
+                    log.info("ПРИНУДИТЕЛЬНО Тикет №{} создан", t.getId());
+                    m.addTicket(t.getId().toString());
+                    m.setStatus("TICKET_CREATED");
+                messageRepository.saveAndFlush(m);
+            } catch (Exception e) {
+                log.error("cant create ticket for message {}", m, e);
+            }
+        });
     }
 
     public void createTickets(List<Message> messages){
