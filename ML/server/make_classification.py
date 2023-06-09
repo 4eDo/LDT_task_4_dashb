@@ -195,6 +195,8 @@ def prepare_comment(text):
     else: return None
 
 def predict_category(comment, problem):
+    if not comment:
+        return None
     vectorized_comment = main_vectorizer.transform([comment])
     if problem == 0:
         return float(model_category_gor.predict(vectorized_comment)[0])
@@ -220,7 +222,7 @@ def process_data(json_data):
     
     df = df.merge(df_fixed[['id', 'tone_predicted']],on='id', how='left')
 
-    problem_df = df[df['tone_predicted']==3]
+    problem_df = df[df['tone_predicted']==3].dropna()
     if len(problem_df.comment_fixed) > 0:
         problem_data = main_vectorizer.transform(problem_df.comment_fixed)
         problem_df['problem_predicted'] = model_problem.predict(problem_data)
