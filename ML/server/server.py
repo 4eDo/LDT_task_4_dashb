@@ -45,7 +45,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
             try:
                 date_to_process = json.loads(data, strict=False)
                 validate(instance=date_to_process, schema=json_shema)
-                classes = make_classification.process(date_to_process)
+                classes = make_classification.process_data(date_to_process)
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -66,6 +66,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         
 if __name__ == '__main__':
     server = HTTPServer(('0.0.0.0', 6543), HTTPRequestHandler)
+    logging.basicConfig(level=logging.INFO)
     logging.info('Starting httpd...\n')
     print('Starting httpd...\n')
     try:
