@@ -9,7 +9,7 @@ main {
 }
 
 header {
-    width: 100%;
+	width: 100%;
     height: 55px;
     position: fixed;
     top: 0px;
@@ -22,6 +22,43 @@ header {
     justify-content: center;
 }
 
+.head_menu {
+  margin-top: 55px;
+    width: 100%;
+    position: sticky;
+    display: flex;
+    align-items: center;
+    border-radius: 0px 0px 5px 5px;
+    flex-wrap: nowrap;
+    justify-content: center;
+  z-index: 1;
+  overflow-x: auto;
+}
+
+.head_menu::-webkit-scrollbar {
+    display: none;
+}
+
+.adm_bt {
+	font-family: "TT Firs Neue Trl Regular";
+    width: 100%;
+    min-width: 140px;
+    height: 30px;
+    border-radius: 0px 0px 5px 5px;
+    background-color: #E2E7EE;
+    border: 1px solid #E2E7EE;
+}
+
+#m_menu_bt {
+	width: 50px;
+    height: 50px;
+    position: fixed;
+    z-index: 2;
+    background-color: #cfcdbd;
+    filter: invert(1);
+    border-radius: 0px 0px 5px 5px;
+	display: none;
+}
 
 /*Иконка "Московский Постомат"*/
 .mp_icon {
@@ -46,13 +83,6 @@ header {
 	z-index: 1;
 }
 
-.adm_bt {
-	width: 100%;
-	height: 30px;
-	border-radius: 0px 0px 5px 5px;
-    background-color: #E2E7EE;
-	border: 1px solid #E2E7EE;
-}
 
 .h_bt_active {
     background-color: #2f3342;
@@ -84,16 +114,16 @@ header {
 	border-radius: 5px;
 	background-color: #E2E7EE;
 	}
-	
+
 .attention {
 	background-color: #FF1935 !important;
 	color: #fff;
 }
 
 .hide {
-	display: none;
+	display: none !important;
 }
-	
+
 /*оформление таблиц*/
 table {
 	width: 100%;
@@ -112,6 +142,12 @@ td {
 		border: 1px solid #BFCADA;
 }
 
+.t_first_cell {
+	border-radius: 5px 0px 0px 0px;
+}
+.t_last_cell {
+	border-radius: 0px 5px 0px 0px;
+}
 
 /*оформление кнопок и полей для заполнения*/
 input {
@@ -119,7 +155,7 @@ input {
 	border-radius: 5px 5px 5px 5px;
 	border: 1px solid #2f3342;
 	margin: 0px 0px 10px 0px;
-	
+
 }
 
 .button {
@@ -178,7 +214,18 @@ button:hover {
   text-align: center;
   color: #fff;
   width:500px;
-  left: 500px;
+}
+
+@media (max-width: 860px) {
+   .head_name {
+   display: none;
+   }
+   #hm_bts{
+	flex-wrap: wrap;
+	}
+	#m_menu_bt {
+	display: block;
+	}
 }
 
 .lct_logo {
@@ -188,3 +235,42 @@ button:hover {
   filter: contrast(0) brightness(2);
   margin-right: 10px;
 }
+
+.red_line {
+    display: inline-block;
+    padding: 5px;
+    border: 1px solid #FF19352f;
+    border-radius: 4px;
+    margin: 5px;
+}
+.red_line:hover {
+    border: 1px solid #FF1935;
+}
+
+.two_in_row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.disabled {
+    opacity: 40%;
+}
+
+
+/**/
+
+#hm_bts {
+	width: 100%;
+	display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+#hmbts::-webkit-scrollbar {
+    display: none;
+}
+
+

@@ -3,10 +3,10 @@
     <p><a class="button block" href="/feedback/add">Добавить один отзыв</a></p>
     <p><a class="button block" href="/feedback/import">Импортировать csv</a></p>
 
-    <table id="messagetable" class="" th:with="messages=${data.get('messages')}">
+    <table cellspacing="0" id="messagetable" class="" th:with="messages=${data.get('messages')}">
         <thead>
         <tr class="">
-            <td>#</td>
+            <td class="t_first_cell">#</td>
             <td>Автор</td>
             <td>Дата создания</td>
             <td>Постамат</td>
@@ -16,6 +16,8 @@
             <td>Оценка</td>
             <td>Тип обращения</td>
             <td>Характер сообщения</td>
+            <td>Связанные тикеты</td>
+            <td class="t_last_cell">Статус</td>
         </tr>
         </thead>
         <th:block th:each="message : ${messages}" th:fragment="next">
@@ -34,7 +36,8 @@
                 </td>
                 <td valign="center" class="">
                     <th:block th:if="${message.postamat != null}">
-                        <p class="muted italic"><span th:text="${message.postamat.id}">ПОСТАМАТ</span><br/>
+                        <p class="muted italic">
+                            <a title="Перейти к постамату" class="red_line muted italic" th:href="${'/postamat/info/' + message.postamat.id}" th:text="${message.postamat.id}">ПОСТАМАТ</a><br/>
                         Индекс: <span th:text="${message.postamat.postIndex}">ПОСТАМАТ</span>,
                          <span th:text="${message.postamat.address}">ПОСТАМАТ</span><br/>
                        Место установки: <span th:text="${message.postamat.location}">ПОСТАМАТ</span><br/>
@@ -59,13 +62,32 @@
                 </td>
                 <td valign="center" class="">
                     <p th:if="${message.category != null}"><span th:text="${message.category.description}"></span></p>
+                    <p th:if="${message.category != null && message.subcat != null && message.category.id != message.subcat.id}"><span th:text="${message.subcat.description}"></span></p>
                     <p th:if="${message.category == null}"><span>Не определено</span></p>
+                    <p><a class="red_line button muted italic"
+                          th:href="${'/feedback/' + message.id + '/category'}">Категория определена ошибочно</a></p>
                 </td>
                 <td valign="center" class="">
                     <p th:if="${(message.tone > -1) && message.tone < 2}">Положительно</p>
                     <p th:if="${(message.tone > -1) && !(message.tone < 1.5) && !(message.tone > 2.5)}">Нейтрально</p>
                     <p th:if="${(message.tone > -1) && message.tone > 2.5}">Отрицательно</p>
                     <p th:if="${!(message.tone > -1)}">Не определено</p>
+                </td>
+                <td valign="center" class="">
+                    <p><a class="red_line" th:title="${'Перейти к тикету ' + ticket}" th:href="${'/ticket/info/' + ticket}" th:each="ticket : ${message.getTicketsArr()}" th:text="${ticket}"></a></p>
+                </td>
+                <td valign="center" class="">
+                    <p th:if="${#strings.equals(message.status, 'UNKNOWN')}">Неизвестно</p>
+                    <p th:if="${#strings.equals(message.status, 'NEW_FROM_FILE')}">Получено из файла</p>
+                    <p th:if="${#strings.equals(message.status, 'SET_RAND_DATA')}" th:title="Заглушка; в будущем недостающие данные будут запрашиваться в системе">Автоматическое заполнение полей</p>
+                    <p th:if="${#strings.equals(message.status, 'NEW_FROM_UI')}">Ожидает обработки</p>
+                    <p th:if="${#strings.equals(message.status, 'CHECK_TONE')}">Анализ сообщения</p>
+                    <p th:if="${#strings.equals(message.status, 'TONE_CHECKED')}">Сообщние проверено</p>
+                    <p th:if="${#strings.equals(message.status, 'CREATE_TICKET')}">Подготовка к созданию тикета</p>
+                    <p th:if="${#strings.equals(message.status, 'NEED_TICKET')}">Запрос на принудительную генерацию тикета</p>
+                    <p th:if="${#strings.equals(message.status, 'CREATE_NEED_TICKET')}">Принудительное создание тикета</p>
+                    <p th:if="${#strings.equals(message.status, 'TICKET_CREATED')}">Тикет создан</p>
+                    <p th:if="${#strings.equals(message.status, 'WITHOUT_TICKET')}">Тикет не требуется</p>
                 </td>
             </tr>
         </th:block>

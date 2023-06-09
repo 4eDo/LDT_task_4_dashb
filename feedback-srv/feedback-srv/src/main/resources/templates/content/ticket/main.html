@@ -1,15 +1,15 @@
 <th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content">
 
-    <table id="tickettable" class="" th:with="tickets=${data.get('tickets')}">
+    <table cellspacing="0" id="tickettable" class="" th:with="tickets=${data.get('tickets')}">
         <thead>
         <tr class="">
-            <td>#</td>
+            <td class="t_first_cell">#</td>
             <td>Дата создания</td>
             <td>Категория</td>
             <td>Партнёр</td>
-            <td>Сообщение</td>
+            <td>Сообщения</td>
             <td>Комментарий</td>
-            <td>Действие</td>
+            <td class="t_last_cell">Действие</td>
         </tr>
         </thead>
         <th:block th:each="ticket : ${tickets}" th:fragment="next">
@@ -24,14 +24,16 @@
                     <p th:if="${ticket.createDate == null}">нет данных</p>
                 </td>
                 <td valign="center" class="">
-                    <p><span th:text="${ticket.category.description}">Категория проблемы</span></p>
+                    <p th:if="${ticket.category != null}"><span th:text="${ticket.category.description}"></span></p>
+                    <p th:if="${ticket.category != null && ticket.subcat != null && ticket.category.id != ticket.subcat.id}"><span th:text="${ticket.subcat.description}"></span></p>
+                    <p th:if="${ticket.category == null}"><span>Не определено</span></p>
                 </td>
                 <td valign="center" class="">
-                    <p><span th:text="${ticket.partner.name}">ПАРТНЁР</span></p>
-                    <p class="muted italic" th:if="${ticket.partner.isDeleted}" th:text="${message.partner.description}"></p>
+                    <p><a class="red_line" th:text="${ticket.partner.name}" th:title="${'Перейти к партнёру ' + ticket.partner.name}" th:href="${'/partner/info/' + ticket.partner.name}">ПАРТНЁР</a></p>
+                    <p class="muted italic" th:if="${ticket.partner.isDeleted}" th:text="${ticket.partner.description}"></p>
                 </td>
                 <td valign="center" class="">
-                    <p><a th:href="${'/feedback/info/' + msg}" th:each="msg : ${ticket.messages}" th:text="${msg}"></a></p>
+                    <p><a class="red_line" th:title="${'Перейти к отзыву ' + msg}" th:href="${'/feedback/info/' + msg}" th:each="msg : ${ticket.getMessagesArr()}" th:text="${msg}"></a></p>
                 </td>
                 <td valign="center" class="">
                     <p><span th:text="${ticket.comment}"></span></p>

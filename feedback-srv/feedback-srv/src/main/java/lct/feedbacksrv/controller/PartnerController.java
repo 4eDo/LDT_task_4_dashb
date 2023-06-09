@@ -1,5 +1,6 @@
 package lct.feedbacksrv.controller;
 
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lct.feedbacksrv.domain.Partner;
 import lct.feedbacksrv.resource.ErrorsList;
@@ -14,9 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * TODO: Add class description
@@ -27,6 +26,8 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/partner")
+@Api(value = "Партнёры",
+        description = "Методы для управления партнёрами")
 public class PartnerController extends MainController {
     private static final String LAYOUT = "partner";
     @Autowired
@@ -74,6 +75,41 @@ public class PartnerController extends MainController {
         }
 
         return render(data);
+    }
+
+    @GetMapping(path = "/api/page")
+    @Operation(
+            summary = "Получить список сообщений постранично",
+            description = "Возвращает страницу с сообщениями"
+    )
+    public ResponseEntity getPartnersPage(Integer page, Integer pageSize) {
+        log.info("Get partners  list page {}, pageSize {}", page, pageSize);
+
+        Map<String, Object> data = new HashMap<>();
+
+        try {
+            Long partnersCount = partnerService.getCount();
+            if(page > 0) page--;
+            pageSize = pageSize==0 ? 30 : pageSize;
+            int from = page * pageSize;
+
+            Paginator.PaginatorBuilder paginator = Paginator.builder();
+            paginator.pageCount(Paginator.calculatePageCount(partnersCount.intValue(), pageSize));
+            if(partnersCount.intValue() < from) {
+                data.put("partners", partnerService.getPartnersByLimitAndOffset(pageSize, 0));
+                paginator.currentPage(1);
+            } else {
+                data.put("partners", partnerService.getPartnersByLimitAndOffset(pageSize, from));
+                paginator.currentPage(page+1);
+            }
+            paginator.pageSize(pageSize);
+            data.put("paginator", paginator.build());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+
+        return ResponseEntity.ok(data);
     }
 
     @Operation(
@@ -179,30 +215,26 @@ public class PartnerController extends MainController {
     public ResponseEntity editPartner(String login,
                                      String password,
                                      Long id,
-                                     String name,
                                      String contacts,
                                      String delegate,
                                      String description
     ) {
         try{
+
             if(partnerService.getPartnerById(id).isEmpty()) {
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
                         .body(String.format("Партнёр %d не найден", id));
             }
-
-            Partner.PartnerBuilder partner = Partner.builder();
-            if(StringUtils.isNotBlank(name))
-                partner.name(name);
+            Partner p = partnerService.getPartnerById(id).get();
             if(StringUtils.isNotBlank(contacts))
-                partner.contacts(contacts);
+                p.setContacts(contacts);
             if(StringUtils.isNotBlank(delegate))
-                partner.delegate(delegate);
+                p.setDelegate(delegate);
             if(StringUtils.isNotBlank(description))
-                partner.description(description);
-            partner.id(id);
+                p.setDescription(description);
 
-            return ResponseEntity.ok(partnerService.addPartner(partner.build()));
+            return ResponseEntity.ok(partnerService.addPartner(p));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e);
         }
@@ -256,6 +288,49 @@ public class PartnerController extends MainController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e);
         }
+    }
+
+    @Operation(
+            summary = "Найти партнёра (по имени)",
+            description = "Позволяет найти партнёра по имени"
+    )
+    @GetMapping(path = {"/info/{name}"})
+    public ModelAndView getOneMessageUI(@PathVariable("name") String name) {
+        log.info("Get partner {}", name);
+
+        Map<String, Object> data = getHeaderMap();
+        data.put("content", "partnerslist");
+
+        try {
+            Long partnersCount = partnerService.getCount();
+            int page = 0;
+            int pageSize = 30;
+            List<Partner> p = partnerService.findByName(name);
+            List<Partner> singlePartner = new ArrayList<>();
+            if(p.isEmpty()) {
+                singlePartner.add(Partner.builder()
+                        .name(name)
+                        .description("Партнёр не найден")
+                        .build());
+            } else {
+                singlePartner.add(p.get(0));
+            }
+            data.put("partners", singlePartner);
+
+            Paginator.PaginatorBuilder paginator = Paginator.builder();
+            paginator.pageCount(Paginator.calculatePageCount(partnersCount.intValue(), pageSize));
+            paginator.currentPage(1);
+
+            paginator.pageSize(pageSize);
+            data.put("paginator", paginator.build());
+
+        } catch (Exception e) {
+            log.info("Exception on getting partners method", e);
+            data.put("content", "error");
+            data.put("errorType", ErrorsList.SERVICE_NOT_AVAILABLE.getDescription());
+        }
+
+        return render(data);
     }
 
 }

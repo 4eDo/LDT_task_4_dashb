@@ -1,18 +1,13 @@
 package lct.feedbacksrv.controller;
 
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lct.feedbacksrv.apiModels.MessageUI;
-import lct.feedbacksrv.csvTemplates.MessageTemplate;
 import lct.feedbacksrv.domain.Message;
 import lct.feedbacksrv.resource.ErrorsList;
 import lct.feedbacksrv.resource.Paginator;
-import lct.feedbacksrv.resource.csv.CSVFileReader;
-import lct.feedbacksrv.service.FeedbackService;
-import lct.feedbacksrv.service.PartnerService;
-import lct.feedbacksrv.service.PostamatService;
-import lct.feedbacksrv.service.TicketService;
+import lct.feedbacksrv.service.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static lct.feedbacksrv.resource.RandomGenerators.getRandIntInRange;
+import java.util.*;
 
 /**
  * Feedback controller
@@ -38,6 +27,8 @@ import static lct.feedbacksrv.resource.RandomGenerators.getRandIntInRange;
 @Slf4j
 @RestController
 @RequestMapping("/feedback")
+@Api(value = "Сообщения",
+description = "Методы для работы с отзывами")
 public class FeedbackController extends MainController{
     private static final String LAYOUT = "feedback";
 
@@ -52,7 +43,7 @@ public class FeedbackController extends MainController{
     @Autowired
     PartnerService partnerService;
     @Autowired
-    TicketService ticketService;
+    CsvReaderService csvReaderService;
 
     @GetMapping
     @ApiIgnore
@@ -66,6 +57,7 @@ public class FeedbackController extends MainController{
 
         Map<String, Object> data = getHeaderMap();
         data.put("content", "messageslist");
+        data.put("subcats", feedbackService.getCategoriesForUi());
 
         try {
             Long partnersCount = feedbackService.getCount();
@@ -94,6 +86,42 @@ public class FeedbackController extends MainController{
         return render(data);
     }
 
+    @GetMapping(path = "/api/page")
+    @Operation(
+            summary = "Получить список сообщений постранично",
+            description = "Возвращает страницу с сообщениями"
+    )
+    public ResponseEntity getMessagesPage(Integer page, Integer pageSize) {
+        log.info("Get messages  list page {}, pageSize {}", page, pageSize);
+
+        Map<String, Object> data = new HashMap<>();
+
+        try {
+            Long partnersCount = feedbackService.getCount();
+            if(page > 0) page--;
+            pageSize = pageSize==0 ? 30 : pageSize;
+            int from = page * pageSize;
+
+            Paginator.PaginatorBuilder paginator = Paginator.builder();
+            paginator.pageCount(Paginator.calculatePageCount(partnersCount.intValue(), pageSize));
+            if(partnersCount.intValue() < from) {
+                data.put("messages", feedbackService.getMessagesByLimitAndOffset(pageSize, 0));
+                paginator.currentPage(1);
+            } else {
+                data.put("messages", feedbackService.getMessagesByLimitAndOffset(pageSize, from));
+                paginator.currentPage(page+1);
+            }
+            paginator.pageSize(pageSize);
+            data.put("paginator", paginator.build());
+
+        } catch (Exception e) {
+            log.info("Exception on getting messages list method", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+
+        return ResponseEntity.ok(data);
+    }
+
     @GetMapping(path = {"/info/{id}"})
     @ApiIgnore
     public ModelAndView getOneMessageUI(@PathVariable("id") Long id) {
@@ -101,6 +129,7 @@ public class FeedbackController extends MainController{
 
         Map<String, Object> data = getHeaderMap();
         data.put("content", "messageslist");
+        data.put("subcats", feedbackService.getCategoriesForUi());
 
         try {
             Long partnersCount = feedbackService.getCount();
@@ -135,8 +164,8 @@ public class FeedbackController extends MainController{
     }
 
     @Operation(
-            summary = "Получить список партнёров",
-            description = "Возвращает список партнёров"
+            summary = "Получить список сообщений",
+            description = "Возвращает все имеющиеся в системе сообщения"
     )
     @GetMapping(path={"/all"})
     public ResponseEntity getMessagesList(String login, String password) {
@@ -157,7 +186,7 @@ public class FeedbackController extends MainController{
         if(message.isPresent()) {
             return ResponseEntity.status(HttpStatus.OK).body(message);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
@@ -173,6 +202,31 @@ public class FeedbackController extends MainController{
             data.put("message", Message.builder().build());
             data.put("postamats", postamatService.getAllPostamatIds());
             data.put("partners", partnerService.getPartnersIdAndNames());
+
+        } catch (Exception e) {
+            log.error("Exception on getting add message page method", e);
+            data.put("content", "error");
+            data.put("errorType", ErrorsList.SERVICE_NOT_AVAILABLE.getDescription());
+        }
+
+        return render(data);
+
+    }
+
+    @GetMapping(path={"/{id}/category"})
+    @ApiIgnore
+    public ModelAndView getEditCategoryPageUI(@PathVariable("id") Long id) {
+        log.info("Get edit category page");
+
+        Map<String, Object> data = getHeaderMap();
+        data.put("content", "editcat");
+        data.put("subcats", feedbackService.getCategoriesForUi());
+
+        try {
+            Optional<Message> m = feedbackService.getMessage(id);
+            if(m.isEmpty()) return getOneMessageUI(id);
+
+            data.put("message", m.get());
 
         } catch (Exception e) {
             log.error("Exception on getting add message page method", e);
@@ -207,13 +261,9 @@ public class FeedbackController extends MainController{
         stars.ifPresent(messageUI::setStars);
         partner.ifPresent(messageUI::setPartner);
 
-        List<MessageUI> unparsed = new ArrayList<>();
-        unparsed.add(messageUI);
-        List<Message> parsed = feedbackService.addMessages(unparsed);
-        parsed.forEach(m -> {ticketService.createTicket(m);});
-        if(!parsed.isEmpty()) {
-
-            return ResponseEntity.status(HttpStatus.OK).body(parsed.get(0));
+        Message m = feedbackService.messageUItoMessage(messageUI);
+        if(m != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(m);
         } else {
             return ResponseEntity.badRequest().build();
         }
@@ -233,35 +283,50 @@ public class FeedbackController extends MainController{
 
     @PostMapping(path = {"/file"}, produces = "text/csv")
     @ResponseBody
+    @Operation(
+            summary = "Импортировать сообщения",
+            description = "Добавляет множество сообщений в систему. Принимает CSV-файл с заголовком 'comment;createdate;stars;summ'\n" +
+                    "где comment - текст отзыва, createdate - дата создания, stars - оценка от 1 до 5, summ - сумма заказа."
+    )
     public ModelAndView importMessages(@RequestParam(name = "file") MultipartFile file) throws IOException {
-        log.info("Create requests");
+        log.info("Create from file");
 
         if (file.isEmpty()) {
             String msg = "Messages import CSV file is empty";
             log.error(msg);
-            throw new InvalidParameterException(msg);
+            Map<String, Object> data = getHeaderMap();
+            data.put("content", "error");
+            data.put("errorType", ErrorsList.EMPTY_FILE.getDescription());
+            return render(data);
         }
 
-        Pair<List<MessageTemplate>, List<String[]>> messagesAndErrors = CSVFileReader.decode(file);
-        List<MessageUI> messageUIS = new ArrayList<>();
-        List<String> postamats = postamatService.getAllPostamatIds();
-        List<Pair<Long, String>> partners = partnerService.getPartnersIdAndNames();
-        messagesAndErrors.getLeft().forEach(messageTemplate -> messageUIS.add(
-                MessageUI.builder().message(messageTemplate.getComment())
-                        .username("unknown")
-                        .orderId("unknown")
-                        .createDate(messageTemplate.getCreatedate())
-                        .stars(messageTemplate.getStars())
-                        .postamat(postamats.get(getRandIntInRange(0, postamats.size() - 1)))
-                        .partner(partners.get(getRandIntInRange(0, partners.size() - 1)).getLeft())
-                        .build()
-        ));
+        boolean isOk = csvReaderService.decodeMessages(file);
+        if(isOk) {
+            return getMessagesListUIWithoutPages();
+        } else {
+            Map<String, Object> data = getHeaderMap();
+            data.put("content", "error");
+            data.put("errorType", ErrorsList.ERROR_ON_PARSE_FILE.getDescription());
+            return render(data);
+        }
 
-        List<Message> m = feedbackService.addMessages(messageUIS);
-        m.forEach(msg -> {
-            if(msg != null) ticketService.createTicket(msg);
-        });
+    }
+    @ApiIgnore
+    @PostMapping(path={"/{id}/editCategory"})
+    public ModelAndView updCat(@PathVariable("id") Long id, Long newCategory, Boolean needTicket) {
+        feedbackService.updCategory(id, newCategory, needTicket);
+        return getOneMessageUI(id);
+    }
 
+    @GetMapping
+    @ApiIgnore
+    @RequestMapping( {"/gm/{key}"})
+    public ModelAndView godModeResetStatuses(@PathVariable("key") String key) {
+        if(key.equals("GODMODE")){
+            log.info("GOD MODE: RESET WIP STATUS");
+            feedbackService.initOnStart();
+            log.info("END GOD MODE: RESET WIP STATUS");
+        }
         return getMessagesListUIWithoutPages();
     }
 }

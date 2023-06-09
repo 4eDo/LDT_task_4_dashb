@@ -1,10 +1,12 @@
 <th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content" th:with="action=${data.get('action')}">
-    <h2 th:text="${action}">Add or edit</h2>
+    <h2 th:if="${action == 'add'}">Добавить нового партнёра</h2>
+    <h2 th:if="${action == 'edit'}" th:text="'Партнёр «' + ${data.get('partner').name} + '»'">Partner name</h2>
     <form method="post"
           name="editForm"
           id="editForm"
           th:action="@{${'/partner/' + action}}">
-    <table id="partnertable" class="" th:with="partner=${data.get('partner')}">
+        <th:block th:if="${action == 'edit'}"> <input type="text" name="name" th:value="${data.get('partner').name}" required readonly hidden> </th:block>
+    <table cellspacing="0" id="partnertable" class="" th:with="partner=${data.get('partner')}">
 
         <tr class="" th:if="${action == 'edit'}">
             <td class="name_td">Идентификатор</td>
@@ -12,10 +14,10 @@
                 <p><input type="text" name="id" readonly th:value="${partner.id}"></p>
             </td>
         </tr>
-        <tr class="">
+        <tr class="" th:if="${action == 'add'}">
             <td class="name_td">Имя организации</td>
             <td valign="center" class="">
-                <p><input type="text" name="name" th:value="${partner.name}" required></p>
+                <p><input type="text" name="name" required></p>
             </td>
         </tr>
         <tr class="">

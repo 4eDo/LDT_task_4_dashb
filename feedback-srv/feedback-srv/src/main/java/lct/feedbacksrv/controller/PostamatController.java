@@ -1,5 +1,6 @@
 package lct.feedbacksrv.controller;
 
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lct.feedbacksrv.domain.Postamat;
 import lct.feedbacksrv.resource.ErrorsList;
@@ -14,11 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static lct.feedbacksrv.resource.RandomGenerators.*;
+import static lct.feedbacksrv.resource.Utils.objectMapper;
 import static lct.feedbacksrv.resource.Utils.stringToDate;
 
 /**
@@ -30,6 +30,8 @@ import static lct.feedbacksrv.resource.Utils.stringToDate;
 @Slf4j
 @RestController
 @RequestMapping("/postamat")
+@Api(value = "Постаматы",
+        description = "Методы для работы с постаматами")
 public class PostamatController extends MainController {
     private static final String LAYOUT = "postamat";
     @Autowired
@@ -79,7 +81,45 @@ public class PostamatController extends MainController {
             return render(data);
 
     }
+    @GetMapping(path = {"/info/{id}"})
+    @ApiIgnore
+    public ModelAndView getOneMessageUI(@PathVariable("id") String id) {
+        log.info("Get postamat {}", id);
 
+        Map<String, Object> data = getHeaderMap();
+        data.put("content", "postamatslist");
+
+        try {
+            Long partnersCount = postamatService.getCount();
+            int page = 0;
+            int pageSize = 30;
+            Optional<Postamat> p = postamatService.getPostamat(id);
+            List<Postamat> singlePostamat = new ArrayList<>();
+            if(p.isEmpty()) {
+                singlePostamat.add(Postamat.builder()
+                        .id(id)
+                        .comment("Сообщение не найдено")
+                        .build());
+            } else {
+                singlePostamat.add(p.get());
+            }
+            data.put("postamats", singlePostamat);
+
+            Paginator.PaginatorBuilder paginator = Paginator.builder();
+            paginator.pageCount(Paginator.calculatePageCount(partnersCount.intValue(), pageSize));
+            paginator.currentPage(1);
+
+            paginator.pageSize(pageSize);
+            data.put("paginator", paginator.build());
+
+        } catch (Exception e) {
+            log.info("Exception on getting postamats method", e);
+            data.put("content", "error");
+            data.put("errorType", ErrorsList.SERVICE_NOT_AVAILABLE.getDescription());
+        }
+
+        return render(data);
+    }
     @Operation(
             summary = "Получить список постаматов",
             description = "Возвращает список постаматов"
@@ -112,6 +152,36 @@ public class PostamatController extends MainController {
         }
 
         return render(data);
+
+    }
+
+    @GetMapping(path={"/map"})
+    @ApiIgnore
+    public ModelAndView getMapPageUI() {
+        log.info("Get postamats on map");
+
+        Map<String, Object> data = getHeaderMap();
+        data.put("content", "map");
+
+        return render(data);
+
+    }
+
+    @GetMapping(path={"/getjsonmap"})
+    @Operation(
+            summary = "Получить модель со списком постаматов для отображения на карте",
+            description = "Возвращает json-объект, благодаря которому через API Яндекс.Карт на карте Москвы расставляются метки постаматов и выводится игнформация о них"
+    )
+    public String getMapJson() {
+        log.info("Get json");
+
+        try {
+            return objectMapper.writeValueAsString(postamatService.getMapData());
+
+        } catch (Exception e) {
+            log.error("Exception on getting map method", e);
+            return null;
+        }
 
     }
 
@@ -315,7 +385,7 @@ public class PostamatController extends MainController {
                             i + 1, getRandIntInRange(1, 100)));
                     p.ipAddress(getRandomIp());
                     p.postIndex(String.format("%d",
-                            getRandIntInRange(100000, 999999)));
+                            getRandIntInRange(101000, 155599)));
                     p.longitude(getRandMoscowLongitude());
                     p.latitude(getRandMoscowLatitude());
                     p.setupDate(getRandDate());
@@ -334,98 +404,4 @@ public class PostamatController extends MainController {
             return ResponseEntity.badRequest().body(e);
         }
     }
-//    @Operation(
-//            summary = "Добавить несколько постаматов CSV",
-//            description = "Позволяет добавить постаматы путём загрузки csv файла"
-//    )
-//    @RequestMapping(path="/add/csv",
-//            method = RequestMethod.POST,
-//            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-//            produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity addcsv(@RequestParam(name = "login") String login,
-//                                 @RequestParam(name = "password") String password,
-//                                 @RequestParam(name = "file") String fileData
-//    ) {
-//        try{
-//////            if(!FilenameUtils.getExtension(f.getOriginalFilename()).equalsIgnoreCase("csv")) {
-//////                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad file extension! Need csv!");
-//////            }
-////            MultipartFile file = new MockMultipartFile("file", fileData.getBytes(StandardCharsets.UTF_8));
-////            List<PostamatTemplate> templates = decode(file);
-////log.info(fileData);
-////            List<Postamat> addedPostamats = new ArrayList<>();
-////            templates.forEach(template -> {
-////                addedPostamats.add(postamatService.addPostamat(templateToPostamat(template)));
-////            });
-//////            if(!FilenameUtils.getExtension(f.getName()).equalsIgnoreCase("csv")) {
-//////                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad file extension! Need csv!");
-//////            }
-//////            List<PostamatTemplate> templates = new CsvToBeanBuilder(new FileReader(f))
-//////                    .withType(PostamatTemplate.class)
-//////                    .build()
-//////                    .parse();
-//////            List<Postamat> addedPostamats = new ArrayList<>();
-//////            templates.forEach(template -> {
-//////                addedPostamats.add(postamatService.addPostamat(templateToPostamat(template)));
-////            });
-////            MappingIterator<PostamatTemplate> postamatIter1 = new CsvMapper()
-////                    .readerWithTypedSchemaFor(PostamatTemplate.class)
-////                    .readValues(fileData);
-//
-//            final CsvMapper CSV_MAPPER = new CsvMapper();
-//            CsvSchema schema = CSV_MAPPER.schemaFor(PostamatTemplate.class);
-//            MappingIterator<PostamatTemplate> postamatIter = new CsvMapper()
-//                    .readerFor(PostamatTemplate.class)
-//                    .with(schema)
-//                    .readValues(fileData);
-//            List<PostamatTemplate> templates = postamatIter.readAll();
-//            List<Postamat> addedPostamats = new ArrayList<>();
-//            templates.forEach(template -> addedPostamats.add(postamatService.addPostamat(templateToPostamat(template))));
-//            return ResponseEntity.ok(addedPostamats);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(e);
-//        }
-//    }
-//
-//    @Operation(
-//            summary = "Добавить несколько постаматов CSV",
-//            description = "Позволяет добавить постаматы путём загрузки csv файла"
-//    )
-//    @RequestMapping(path="/add/csvM",
-//            method = RequestMethod.POST,
-//            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-//            produces = {
-//                    MediaType.APPLICATION_ATOM_XML_VALUE,
-//                    MediaType.APPLICATION_JSON_VALUE
-//            })
-//    public ResponseEntity addcsv(@RequestParam(name = "login") String login,
-//                                 @RequestParam(name = "password") String password,
-//                                 @ModelAttribute File file
-//    ) {
-//        try{
-////            if(!FilenameUtils.getExtension(f.getOriginalFilename()).equalsIgnoreCase("csv")) {
-////                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad file extension! Need csv!");
-////            }
-////            List<PostamatTemplate> templates = decode(file);
-////
-////            List<Postamat> addedPostamats = new ArrayList<>();
-////            templates.forEach(template -> {
-////                addedPostamats.add(postamatService.addPostamat(templateToPostamat(template)));
-////            });
-//            if(!FilenameUtils.getExtension(file.getName()).equalsIgnoreCase("csv")) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad file extension! Need csv!");
-//            }
-//            List<PostamatTemplate> templates = new CsvToBeanBuilder(new FileReader(file))
-//                    .withType(PostamatTemplate.class)
-//                    .build()
-//                    .parse();
-//            List<Postamat> addedPostamats = new ArrayList<>();
-//            templates.forEach(template -> {
-//                addedPostamats.add(postamatService.addPostamat(templateToPostamat(template)));
-//            });
-//            return ResponseEntity.ok(addedPostamats);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(e);
-//        }
-//    }
 }

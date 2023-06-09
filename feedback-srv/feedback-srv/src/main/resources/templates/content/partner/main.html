@@ -1,14 +1,16 @@
 <th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content">
 
-    <p><a class="button" href="/partner/add">Добавить</a></p>
-    <table id="partnertable" class="" th:with="partners=${data.get('partners')}">
+    <p><a class="button block" href="/partner/add">Добавить</a></p>
+    <table cellspacing="0" id="partnertable" class="" th:with="partners=${data.get('partners')}">
         <thead>
         <tr class="">
-            <td>Идентификатор</td>
+            <td class="t_first_cell">Идентификатор</td>
             <td>Имя организации</td>
             <td>Контакты</td>
             <td>Представитель</td>
             <td>Комментарий</td>
+            <td title="Процент отзывов с негативной оценкой постамата от общего числа отзывов для конкретного постамата">% недовольства</td>
+            <td class="t_last_cell">Действие</td>
         </tr>
         </thead>
         <th:block th:each="partner : ${partners}" th:fragment="next">
@@ -27,6 +29,9 @@
                 </td>
                 <td valign="center" class="">
                     <p><span th:text="${partner.description}"></span></p>
+                </td>
+                <td valign="center" class="" th:title="'Данные обновляются раз в ' + ${data.get('recheckNegativeMin')} + ' мин.'">
+                    <p><span th:text="${partner.negativePercent > 0 ? #numbers.formatDecimal(partner.negativePercent,1,2) : 'Не определено'}"></span></p>
                 </td>
                 <td valign="center" class="">
                     <p>

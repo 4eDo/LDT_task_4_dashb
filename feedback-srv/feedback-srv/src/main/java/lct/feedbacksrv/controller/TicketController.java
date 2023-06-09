@@ -1,5 +1,6 @@
 package lct.feedbacksrv.controller;
 
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lct.feedbacksrv.domain.Ticket;
 import lct.feedbacksrv.resource.ErrorsList;
@@ -26,6 +27,8 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/ticket")
+@Api(value = "Заявки/Тикеты",
+        description = "Методы для управления тикетами")
 public class TicketController extends MainController {
     private static final String LAYOUT = "ticket";
     @Autowired

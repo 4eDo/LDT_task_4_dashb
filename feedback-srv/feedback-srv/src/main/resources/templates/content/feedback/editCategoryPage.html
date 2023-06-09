@@ -1,0 +1,40 @@
+<th:block xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="content" th:with="message=${data.get('message')}">
+    <style>
+    section {
+        border-radius: 1em;
+        padding: 1em;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%) }
+  </style>
+    <section>
+        <p class="block attention">ИЗМЕНЕНИЕ КАТЕГОРИИ СООБЩЕНИЯ</p>
+
+        <p><textarea
+                style="width: 450px; height: 150px;"
+                th:text="${message.message}" readonly></textarea></p>
+
+        <form name="editForm"
+            id="editForm"
+            th:action="@{${'/feedback/'+message.id + '/editCategory'}}"
+              method="post">
+
+            <select id="newCategory" name="newCategory">
+                <option th:each="sub : ${data.get('subcats')}"
+                        th:value="${sub.key}"
+                        th:text="${sub.value}"
+                        th:selected="${message.subcat != null && sub.key == message.subcat.id}"></option>
+            </select>
+            <p>Создать тикет, если ещё не создан:
+                <input type="checkbox" id="needTicket" name="needTicket">
+            </p>
+
+            <button
+                    th:onclick="|window.location.href='/feedback/info/${ message.id}'|"
+                    type="submit">ИЗМЕНИТЬ КАТЕГОРИЮ</button>
+
+        </form>
+    </section>
+</th:block>

@@ -10,6 +10,8 @@ import lombok.Getter;
 @Getter
 public enum ErrorsList {
     SERVICE_NOT_AVAILABLE("Service not available"),
+    ERROR_ON_PARSE_FILE("Error on parse file"),
+    EMPTY_FILE("Empty file"),
 
     POSTAMAT_NOT_FOUND("Postamat not found"),
 
