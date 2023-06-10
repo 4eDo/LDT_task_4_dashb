@@ -58,7 +58,7 @@ Swagger позволяет автоматически генерировать p
 [Демонстрационная версия сервиса обработки обратной связи (веб-сайт)](http://178.170.196.229:11117/)
 
 ## Документация
-[Документация на WEB-сервис обратной связи]([http://178.170.196.229:11117/](https://github.com/4eDo/LDT_task_4_dashb/blob/main/docs/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F.docx))
+[Документация на WEB-сервис обратной связи](https://github.com/4eDo/LDT_task_4_dashb/blob/main/docs/%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F.docx))
 
 ## Планы по развитию сервиса
 [TODO.md](https://github.com/4eDo/LDT_task_4_dashb/blob/main/TODO.md)
